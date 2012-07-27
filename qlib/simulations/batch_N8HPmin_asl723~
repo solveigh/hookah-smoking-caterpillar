@@ -2,7 +2,7 @@
 
 NED8=WRS_N8
 
-SRCDIR=/common/home/bel/matthies/lnx/git/solveigh/qlib
+SRCDIR=/common/home/bel/matthies/lnx/git/solveigh/qlib/
 #/common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
 SIMDIR=/common/home/bel/matthies/lnx/whiteRabbit/
 
