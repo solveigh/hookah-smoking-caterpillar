@@ -41,7 +41,50 @@ void Router::initialize() {
 	_nofCoS = par("nofCoS");
 	cout << "Router nofCoS " << _nofCoS << endl;
 
-	if( _nofCoS==3 ) {
+	if( _nofCoS==8 ) {
+			rrCounter = 7;
+
+			// keep a pointer to queue 7
+			_q7 = getQueue(7);
+
+			// pointers to other queues (6..0)
+			for (int i = _nofCoS - 2; i > -1; i--)
+				_qs.push_back(getQueue(i));
+
+			// WFQ
+			_weight7 = par("weight7");
+			_weight6 = par("weight6");
+			_weight5 = par("weight5");
+			_weight4 = par("weight4");
+			_weight3 = par("weight3");
+			_weight2 = par("weight2");
+			_weight1 = par("weight1");
+			_weight0 = par("weight0");
+			_counter7 = 0;
+
+			wfq_weight[7] = _weight7;
+			wfq_weight[6] = _weight6;
+			wfq_weight[5] = _weight5;
+			wfq_weight[4] = _weight4;
+			wfq_weight[3] = _weight3;
+			wfq_weight[2] = _weight2;
+			wfq_weight[1] = _weight1;
+			wfq_weight[0] = _weight0;
+
+			// WRR
+			weight[7] = _weight7;
+			weight[6] = _weight7 - 1;
+			weight[5] = _weight7 - 2;
+			weight[4] = _weight7 - 2;
+			weight[3] = _weight7 - 3;
+			weight[2] = _weight7 - 3;
+			weight[1] = _weight7 - 3;
+			weight[0] = _weight7 - 4;
+
+			// priority
+			_priorityCounter = 7;
+
+	} else if( _nofCoS==3 ) {
 		rrCounter = 2;
 
 		// keep a pointer to queue 2
@@ -62,6 +105,7 @@ void Router::initialize() {
 		wfq_weight[0] = _weight0;
 
 		// WRR
+		_weight7 = par("weight7");
 		weight[2] = _weight7 - 3;
 		weight[1] = _weight7 - 3;
 		weight[0] = _weight7 - 4;
@@ -69,50 +113,7 @@ void Router::initialize() {
 		// priority
 		_priorityCounter = 2;
 
-	} else if( _nofCoS==8 ) {
-		rrCounter = 7;
-
-		// keep a pointer to queue 7
-		_q7 = getQueue(7);
-
-		// pointers to other queues (6..0)
-		for (int i = _nofCoS - 2; i > -1; i--)
-			_qs.push_back(getQueue(i));
-
-		// WFQ
-		_weight7 = par("weight7");
-		_weight6 = par("weight6");
-		_weight5 = par("weight5");
-		_weight4 = par("weight4");
-		_weight3 = par("weight3");
-		_weight2 = par("weight2");
-		_weight1 = par("weight1");
-		_weight0 = par("weight0");
-		_counter7 = 0;
-
-		wfq_weight[7] = _weight7;
-		wfq_weight[6] = _weight6;
-		wfq_weight[5] = _weight5;
-		wfq_weight[4] = _weight4;
-		wfq_weight[3] = _weight3;
-		wfq_weight[2] = _weight2;
-		wfq_weight[1] = _weight1;
-		wfq_weight[0] = _weight0;
-
-		// WRR
-		weight[7] = _weight7;
-		weight[6] = _weight7 - 1;
-		weight[5] = _weight7 - 2;
-		weight[4] = _weight7 - 2;
-		weight[3] = _weight7 - 3;
-		weight[2] = _weight7 - 3;
-		weight[1] = _weight7 - 3;
-		weight[0] = _weight7 - 4;
-		
-		// priority
-		_priorityCounter = 7;
-
-	}	// else N=8
+	}
 
 	cGate* outputgate = gate("pppg");
 	channel = check_and_cast<cDatarateChannel *>(
