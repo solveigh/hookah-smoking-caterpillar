@@ -1,0 +1,46 @@
+//
+// This file is part of an OMNeT++/OMNEST simulation example.
+//
+// Copyright (C) 2006-2008 OpenSim Ltd.
+//
+// This file is distributed WITHOUT ANY WARRANTY. See the file
+// `license' for details on this and other legal matters.
+//
+
+#ifndef __QUEUEING_IPASSIVEQUEUE_H
+#define __QUEUEING_IPASSIVEQUEUE_H
+
+#include "QueueingDefs.h"
+#include "Packet_m.h"
+#include "WRPacket.h"
+
+namespace qlib {
+
+class WRPacket;
+
+/**
+ * The following interface must be implemented by a queue which can't process
+ * jobs on its own. A server process uses these methods to query for new jobs
+ * once it becomes idle.
+ */
+class QUEUEING_API IPassiveQueue
+{
+    public:
+        virtual ~IPassiveQueue() { };
+        // the current length of the queue (number of packets)
+        virtual int length() = 0;
+        // requests the queue to send out the next job on its "gateIndex" gate.
+        virtual void request(int gateIndex) = 0;
+
+        // the current amount of the packet sizes in the queue
+        virtual int size() = 0;
+
+        virtual WRPacket* front() = 0;
+
+        virtual cQueue getQueue() = 0;
+};
+
+}; //namespace
+
+#endif
+

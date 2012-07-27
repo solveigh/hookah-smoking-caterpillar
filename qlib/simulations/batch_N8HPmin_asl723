@@ -1,0 +1,27 @@
+#! /bin/sh
+
+NED8=WRS_N8
+
+SRCDIR=/common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
+SIMDIR=/common/home/bel/matthies/lnx/whiteRabbit/
+
+echo $SRCDIR
+echo $SIMDIR
+
+cd $SIMDIR/asl723/qlib/simulations
+
+EDIR=../out/gcc-release/src
+EXECUTABLE=qlib
+
+
+chmod +x $EDIR/$EXECUTABLE
+#echo $(pwd)
+#echo $(ls $EDIR)
+
+rm -rf *.csv *.tex
+
+# run batch simulation
+./$EDIR/$EXECUTABLE -f omnetppN8minHP.ini -u Cmdenv -c $NED8
+mkdir N8HPmin
+mv *.csv N8HPmin
+mv *.tex N8HPmin

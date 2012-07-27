@@ -1,0 +1,18 @@
+#! /bin/sh
+
+NED8=WRS_N8
+
+#EDIR=../out/gcc-debug/src
+EDIR=../out/gcc-release/src
+EXECUTABLE=qlib
+
+
+chmod +x $EDIR/$EXECUTABLE
+#echo $(pwd)
+#echo $(ls $EDIR)
+
+rm -rf *.csv *.tex
+
+./$EDIR/$EXECUTABLE -f omnetppN8maxHP.ini -u Cmdenv -c $NED8
+mkdir N8HPmax
+mv *.csv N8HPmax

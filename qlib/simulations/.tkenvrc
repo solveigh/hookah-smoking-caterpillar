@@ -1,0 +1,6 @@
+# Partial Tkenv config file -- see $HOME/.tkenvrc as well
+inspector "WRS_N3" "WRS_N3" "2" "607x338+0+52:normal"
+inspector "Tictoc" "Tictoc" "2" "607x338+0+52:normal"
+inspector "Tictoc.queue0" "PassiveQueue" "1" "370x251+194+472:normal"
+inspector "Tictoc.source" "Source" "1" "456x437+210+783:normal"
+

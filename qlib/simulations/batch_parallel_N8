@@ -1,0 +1,37 @@
+#! /bin/sh
+
+NED8=WRS_N8
+
+EDIR=../out/gcc-release/src
+EXECUTABLE=qlib
+
+SRCDIR=/home/bel/matthies/lnx/git/queue1/qlib
+#  /common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
+SIMDIR=/common/home/bel/matthies/lnx/whiteRabbit/
+
+echo $SRCDIR
+echo $SIMDIR
+
+#remove old files
+rm -rf $SIMDIR/asl723
+rm -rf $SIMDIR/asl724
+
+# create new folders
+mkdir $SIMDIR/asl723
+mkdir $SIMDIR/asl724
+
+#copy qlib to its pc specific directory to avoid file clashes
+cp -r $SRCDIR/ $SIMDIR/asl723/
+cp -r $SRCDIR/ $SIMDIR/asl724/
+cp $SRCDIR/simulations/batch_N8* ~
+
+chmod +x $EDIR/$EXECUTABLE
+#echo $(pwd)
+#echo $(ls $EDIR)
+
+# open different console windows
+gnome-terminal -x sh -c 'ssh -X matthies@asl723; cd /common/home/bel/matthies/lnx/whiteRabbit/asl723/; ./batch_N8HPmin_asl723; exec bash'
+
+gnome-terminal -x sh -c 'ssh -X matthies@asl724; cd /common/home/bel/matthies/lnx/whiteRabbit/asl724/; ./batch_N8HPmin_asl724; exec bash'
+
+# after login execute manually ./batch_N8HPmin_asl723 / ./batch_N8HPmax_asl724
