@@ -1,0 +1,28 @@
+#! /bin/sh
+
+NED3=WRS_N3
+
+SRCDIR=/common/home/bel/matthies/lnx/git/solveigh/qlib
+#/common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
+SIMDIR=/common/home/bel/matthies/lnx/whiteRabbit/
+
+echo $SRCDIR
+echo $SIMDIR
+
+cd $SIMDIR/asl721/qlib/simulations
+
+EDIR=../out/gcc-release/src
+EXECUTABLE=qlib
+
+
+chmod +x $EDIR/$EXECUTABLE
+#echo $(pwd)
+#echo $(ls $EDIR)
+
+rm -rf *.csv *.tex
+
+# run batch simulation
+./$EDIR/$EXECUTABLE -f omnetppN3minHP.ini -u Cmdenv -c $NED3
+mkdir N3HPmin
+mv *.csv N3HPmin
+mv *.tex N3HPmin

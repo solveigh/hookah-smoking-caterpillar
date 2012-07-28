@@ -371,15 +371,15 @@ void Sink::writeTimes2File4Plot(string filename) {
 void Sink::writeDropped2File(string filename) {
 	string str;
 	char buf[150];
-#ifdef __linux__
-	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Algorithm") ) {
-		sprintf(buf,"Algorithm,7 (%d),6 (%d),5 (%d),4 (%d),3 (%d),2 (%d),1 (%d),0 (%d)", _source->getSent().at(7), _source->getSent().at(6), _source->getSent().at(5),
-				_source->getSent().at(4),_source->getSent().at(3), _source->getSent().at(2), _source->getSent().at(1), _source->getSent().at(0));
-		str = string(buf);
-		Useful::getInstance()->appendToFile(filename, str);
-	}
-#endif
 	if( _nofCoS==8 ) {
+#ifdef __linux__
+		if( !Useful::getInstance()->testFirstLineOfFile(filename, "Algorithm") ) {
+			sprintf(buf,"Algorithm,7 (%d),6 (%d),5 (%d),4 (%d),3 (%d),2 (%d),1 (%d),0 (%d)", _source->getSent().at(7), _source->getSent().at(6), _source->getSent().at(5),
+					_source->getSent().at(4),_source->getSent().at(3), _source->getSent().at(2), _source->getSent().at(1), _source->getSent().at(0));
+			str = string(buf);
+			Useful::getInstance()->appendToFile(filename, str);
+		}
+#endif
 #if 1
 		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", _router->getSchedulingAlgorithm().c_str(), _source->getSent().at(7), _qs.at(7)->getDropped().size(),
 				_source->getSent().at(6), _qs.at(6)->getDropped().size(), _source->getSent().at(5), _qs.at(5)->getDropped().size(),
@@ -392,6 +392,13 @@ void Sink::writeDropped2File(string filename) {
 			_qs.at(2)->getDropped().size(), _qs.at(1)->getDropped().size(), _qs.at(0)->getDropped().size());
 #endif
 	} else if(_nofCoS==3) {
+#ifdef __linux__
+		if( !Useful::getInstance()->testFirstLineOfFile(filename, "Algorithm") ) {
+			sprintf(buf,"Algorithm,2 (%d),1 (%d),0 (%d)", _source->getSent().at(2), _source->getSent().at(1), _source->getSent().at(0));
+			str = string(buf);
+			Useful::getInstance()->appendToFile(filename, str);
+		}
+#endif
 #if 1
 		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d", _router->getSchedulingAlgorithm().c_str(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(),
@@ -1318,6 +1325,315 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str += buf;
 			str += "%</NumPacketsHP25minSPvar3>";
 			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25minSPvar2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPvar2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25minSPvar1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPvar1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25minSPvar0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPvar0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+	} else if( _nofCoS==3 ) {	// TODO
+		// most simple approach
+		// HP max 75 %
+		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75max_SPmin.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP75maxSPmin2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPmin2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75maxSPmin1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPmin1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75maxSPmin0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPmin0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75max_SPmax.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP75maxSPmax2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPmax2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75maxSPmax1>";
+			buf[19] = '\0';
+			str += buf;
+			sprintf(buf,"%d", _source->getSent().at(1));
+			str += "%</NumPacketsHP75maxSPmax1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75maxSPmax0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPmax0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75max_SPvar.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP75maxSPvar2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPvar2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75maxSPvar1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPvar1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75maxSPvar0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75maxSPvar0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		// HP max 25%
+		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25max_SPmin.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP25maxSPmin2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			sprintf(buf,"%d", _source->getSent().at(2));
+			str += "%</NumPacketsHP25maxSPmin2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25maxSPmin1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPmin1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25maxSPmin0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPmin0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25max_SPmax.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP25maxSPmax2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPmax2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25maxSPmax1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPmax1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25maxSPmax0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPmax0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25max_SPvar.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP25maxSPvar2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPvar2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25maxSPvar1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPvar1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25maxSPvar0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25maxSPvar0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+
+		//"data_N3_HP75min_SPmin.txt", "data_N3_HP75min_SPmax.txt", "data_N3_HP75min_SPvar.txt", "data_N3_HP25min_SPmin.txt", "data_N3_HP25min_SPmax.txt", "data_N3_HP25min_SPvar.txt"
+		// HP min 75 %
+		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75min_SPmin.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP75minSPmin2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPmin2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75minSPmin1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPmin1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75minSPmin0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPmin0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75min_SPmax.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP75minSPmax2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPmax2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75minSPmax1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPmax1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75minSPmax0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPmax0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75min_SPvar.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP75minSPvar2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPvar2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75minSPvar1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPvar1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP75minSPvar0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP75minSPvar0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		// HP min 25%
+		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25min_SPmin.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP25minSPmin2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPmin2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25minSPmin1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPmin1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25minSPmin0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPmin0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25min_SPmax.txt")==0 ) {
+			str = "";
+			str += "%<*NumPacketsHP25minSPmax2>";
+			sprintf(buf,"%d", _source->getSent().at(2));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPmax2>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25minSPmax1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPmax1>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			str += "%<*NumPacketsHP25minSPmax0>";
+			sprintf(buf,"%d", _source->getSent().at(0));
+			buf[19] = '\0';
+			str += buf;
+			str += "%</NumPacketsHP25minSPmax0>";
+			Useful::getInstance()->appendToFile(filename, str);
+			str = "";
+			return;
+		}
+		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25min_SPvar.txt")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP25minSPvar2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
