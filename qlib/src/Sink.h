@@ -35,6 +35,8 @@ class Source;
 class QUEUEING_API Sink : public cSimpleModule
 {
   private:
+	double perc(int sent, int dropped);
+
 	simsignal_t lifeTimeSignal;
 	simsignal_t totalQueueingTimeSignal;
 	simsignal_t queuesVisitedSignal;

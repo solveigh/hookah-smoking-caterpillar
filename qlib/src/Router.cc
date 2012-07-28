@@ -348,10 +348,13 @@ void Router::handleMessage(cMessage *msg) {
 					// iterate over all packets in queue???
 					qname = getQueueName(k);
 					cQueue cq = q->getQueue();
+					//cout << "1 " << qname << " " << cq.length();
 					if( q2 != NULL ) {
 						cQueue::Iterator qit = cQueue::Iterator(cq,false);
 						while(!qit.end()) {
-							WRPacket *p = (WRPacket*)(cObject*)qit();
+							WRPacket *p = (WRPacket*)(cObject*)qit();	// TODO does this really remove the packet from the queue?
+							//cObject *o = cq.remove((cObject*)qit());
+							//cout << " 2 " << cq.length() << endl;
 							double s = p->getCreationTime().dbl();
 							_mapPacketAges.insert( pair< double, int >(s, k) );
 							qit++;

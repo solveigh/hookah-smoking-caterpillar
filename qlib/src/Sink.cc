@@ -18,8 +18,11 @@ inline double s2mus(double s) {
 	return (s * 1000000);	// x 10e6
 }
 
-inline double perc(int sent, int dropped) {
-	return (double(dropped)/double(sent))*100.0;
+double Sink::perc(int dropped, int sent) {
+	double d=0.;
+	if( sent >0 )
+		d = (double(dropped)/double(sent))*100.0;
+	return d;
 }
 
 void Sink::initialize() {

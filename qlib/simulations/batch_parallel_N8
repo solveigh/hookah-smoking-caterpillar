@@ -6,8 +6,6 @@ EDIR=../out/gcc-release/src
 EXECUTABLE=qlib
 
 SRCDIR=/common/home/bel/matthies/lnx/git/solveigh/qlib/
-#/home/bel/matthies/lnx/git/queue1/qlib
-#  /common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
 SIMDIR=/common/home/bel/matthies/lnx/whiteRabbit/
 
 echo $SRCDIR
