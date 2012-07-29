@@ -72,7 +72,7 @@ void Router::initialize() {
 			wfq_weight[0] = _weight0;
 
 			// WRR
-			weight[7] = _weight7;
+			weight[7] = _weight7;	// TODO lower weights may not get 0!!!
 			weight[6] = _weight7 - 1;
 			weight[5] = _weight7 - 2;
 			weight[4] = _weight7 - 2;
@@ -148,7 +148,9 @@ void Router::handleMessage(cMessage *msg) {
 	string qname;
 
 	int queueIndex = -1; // by default we drop the message
+
 	if (msg == triggerServiceMsg) {
+		// a trigger event arrived
 		switch (routingAlgorithm) {
 		/*case ALG_RANDOM: // N=8, N=3
 			queueIndex = 0 + int(gateSize("in") * rand() / (RAND_MAX + 1.0));
@@ -503,6 +505,7 @@ void Router::handleMessage(cMessage *msg) {
 			scheduleAt(simTime() + serviceTime, triggerServiceMsg);
 		}
 	} else {
+		// a requested packet arrived
 		WRPacket* p = check_and_cast<WRPacket*>(msg);
 		//cout << simTime() << " " << p->getTimestamp() << " " << p->getTotalQueueingTime() << " "<< p->getTotalServiceTime() << endl;
 		//cout << "triggerServiceMsg " << triggerServiceMsg->getSendingTime() << " " << simTime()-triggerServiceMsg->getArrivalTime() << " " << triggerServiceMsg->getTimestamp() << " " << triggerServiceMsg->getArrivalTime() << endl;
@@ -514,13 +517,14 @@ void Router::handleMessage(cMessage *msg) {
 
 		send(p, "pppg");
 
+		// TODO remove this, not necessary
 		opcnt = determinOperationCount(routingAlgorithm);
 		p->setOperationCounter(p->getOperationCounter() + opcnt);
 
 		// cancel and re-schedule
 		cancelEvent(triggerServiceMsg);
 
-		// Notify ourselves the moment the transmission line finishes transmitting the packet.
+		// Notify ourselves the moment the transmission line finishes transmitting the packet to choose (schedule) the next one.
 		simtime_t ft =
 				gate("pppg")->getTransmissionChannel()->getTransmissionFinishTime();
 		scheduleAt(ft, triggerServiceMsg);

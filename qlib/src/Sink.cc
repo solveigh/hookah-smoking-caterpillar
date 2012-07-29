@@ -209,14 +209,22 @@ void Sink::finish() {
 	writeDropped2FilePercentage(fname);
 
 	fname = string("times_");
-	//fname+=_router->getSchedulingAlgorithm();
-	//fname+="_";
 	fname+=_source->getInputDataFileName();
 	fname+=string(".csv");
 	writeQueuingSchedulingTimes2File(fname);
 
 	writeTimes2File4Plot(fname);
 	writeQueuingTimes2File4Plot(fname);
+
+	fname = string("times_");
+	fname+=_router->getSchedulingAlgorithm();
+	fname+=string(".csv");
+	writeQueuingSchedulingTimes2File4Table(fname);
+
+	fname = string("dropped_perc_");
+	fname+=_router->getSchedulingAlgorithm();
+	fname+=string(".csv");
+	writeDropped2FilePercentage4Table(fname);
 
 	writeNumbers2TexFile("numbers.tex");
 
@@ -297,6 +305,33 @@ void Sink::writeQueuingSchedulingTimes2File(string filename) {
 		Useful::getInstance()->appendToFile(filename, str);
     }
 } //writeQueuingSchedulingTimes2File()
+
+void Sink::writeQueuingSchedulingTimes2File4Table(string filename) {
+	string str;
+	char buf[250];
+
+    if(_nofCoS==8) {
+		sprintf(buf,"%s,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf",
+				_source->getInputDataFileName().c_str(),
+				_source->getSent().at(7),avg_lifetime(vq7),avg_lifetime(vsch7),
+				_source->getSent().at(6),avg_lifetime(vq6),avg_lifetime(vsch6),
+				_source->getSent().at(5),avg_lifetime(vq5),avg_lifetime(vsch5),
+				_source->getSent().at(4),avg_lifetime(vq4),avg_lifetime(vsch4),
+				_source->getSent().at(3),avg_lifetime(vq3),avg_lifetime(vsch3),
+				_source->getSent().at(2),avg_lifetime(vq2),avg_lifetime(vsch2),
+				_source->getSent().at(1),avg_lifetime(vq1),avg_lifetime(vsch1),
+				_source->getSent().at(0),avg_lifetime(vq0),avg_lifetime(vsch0));
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+    } else if (_nofCoS==3) {
+		sprintf(buf,"%s,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf", _source->getInputDataFileName().c_str(),
+				_source->getSent().at(2),avg_lifetime(vq2),avg_lifetime(vsch2),
+				_source->getSent().at(1),avg_lifetime(vq1),avg_lifetime(vsch1),
+				_source->getSent().at(0),avg_lifetime(vq0),avg_lifetime(vsch0));
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+    }
+} //writeQueuingSchedulingTimes2File4Table()
 
 void Sink::writeQueuingTimes2File4Plot(string filename) {
 	string fname = string("plot_queuing_");
@@ -525,7 +560,48 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
 	}
-} //writeDropped2File()
+} //writeDropped2FilePercentage()
+
+void Sink::writeDropped2FilePercentage4Table(string filename) {
+	string str;
+	char buf[200];
+	if( _nofCoS==8 ) {
+		double d0=0., d1=0., d2=0., d3=0., d4=0., d5=0., d6=0., d7=0.;
+		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
+		d7 = perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7));
+		d6 = perc(_qs.at(6)->getDropped().size(),_source->getSent().at(6));
+		d5 = perc(_qs.at(5)->getDropped().size(),_source->getSent().at(5));
+		d4 = perc(_qs.at(4)->getDropped().size(),_source->getSent().at(4));
+		d3 = perc(_qs.at(3)->getDropped().size(),_source->getSent().at(3));
+		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
+		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
+		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
+		sprintf(buf,"%s,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
+				_source->getInputDataFileName().c_str(),
+				_source->getSent().at(7),_qs.at(7)->getDropped().size(), d7,
+				_source->getSent().at(6),_qs.at(6)->getDropped().size(), d6,
+				_source->getSent().at(5),_qs.at(5)->getDropped().size(), d5,
+				_source->getSent().at(4),_qs.at(4)->getDropped().size(), d4,
+				_source->getSent().at(3),_qs.at(3)->getDropped().size(), d3,
+				_source->getSent().at(2),_qs.at(2)->getDropped().size(), d2,
+				_source->getSent().at(1),_qs.at(1)->getDropped().size(), d1,
+				_source->getSent().at(0),_qs.at(0)->getDropped().size(), d0);
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+	} else if(_nofCoS==3) {
+		double d0=0., d1=0., d2=0.;
+		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
+		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
+		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
+		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
+		sprintf(buf,"%s,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf", _source->getInputDataFileName().c_str(),
+				_source->getSent().at(2), _qs.at(2)->getDropped().size(), d2,
+				_source->getSent().at(1), _qs.at(1)->getDropped().size(), d1,
+				_source->getSent().at(0), _qs.at(0)->getDropped().size(), d0);
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+	}
+} //writeDropped2FilePercentage4Table()
 
 void Sink::write2File(string filename) {
 	string str;
@@ -636,7 +712,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 	if( _nofCoS==8 ) {
 		// most simple approach
 		// HP max 75 %
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP75max_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N8HP75maxSPmin")==0 ) {
 			str += "%<*NumPacketsHP75maxSPmin7>";
 			sprintf(buf,"%d", _source->getSent().at(7));
 			buf[19] = '\0';
@@ -695,7 +771,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP75max_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP75maxSPmax")==0 ) {
 			str += "%<*NumPacketsHP75maxSPmax7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -754,7 +830,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP75max_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP75maxSPvar")==0 ) {
 			str += "%<*NumPacketsHP75maxSPvar7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -814,7 +890,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			return;
 		}
 		// HP max 25%
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP25max_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N8HP25maxSPmin")==0 ) {
 			str += "%<*NumPacketsHP25maxSPmin7>";
 			sprintf(buf,"%d", _source->getSent().at(7));
 			buf[19] = '\0';
@@ -873,7 +949,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP25max_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP25maxSPmax")==0 ) {
 			str += "%<*NumPacketsHP25maxSPmax7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -932,7 +1008,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP25max_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP25maxSPvar")==0 ) {
 			str += "%<*NumPacketsHP25maxSPvar7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -992,9 +1068,9 @@ void Sink::writeNumbers2TexFile(string filename) {
 			return;
 		}
 
-		//"data_N8_HP75min_SPmin.txt", "data_N8_HP75min_SPmax.txt", "data_N8_HP75min_SPvar.txt", "data_N8_HP25min_SPmin.txt", "data_N8_HP25min_SPmax.txt", "data_N8_HP25min_SPvar.txt"
+		//"N8HP75minSPmin", "N8HP75minSPmax", "N8HP75minSPvar", "N8HP25minSPmin", "N8HP25minSPmax", "N8HP25minSPvar"
 		// HP min 75 %
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP75min_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N8HP75minSPmin")==0 ) {
 			str += "%<*NumPacketsHP75minSPmin7>";
 			sprintf(buf,"%d", _source->getSent().at(7));
 			buf[19] = '\0';
@@ -1053,7 +1129,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP75min_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP75minSPmax")==0 ) {
 			str += "%<*NumPacketsHP75minSPmax7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -1112,7 +1188,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP75min_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP75minSPvar")==0 ) {
 			str += "%<*NumPacketsHP75minSPvar7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -1172,7 +1248,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			return;
 		}
 		// HP min 25%
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP25min_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N8HP25minSPmin")==0 ) {
 			str += "%<*NumPacketsHP25minSPmin7>";
 			sprintf(buf,"%d", _source->getSent().at(7));
 			buf[19] = '\0';
@@ -1231,7 +1307,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP25min_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP25minSPmax")==0 ) {
 			str += "%<*NumPacketsHP25minSPmax7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -1290,7 +1366,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N8_HP25min_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N8HP25minSPvar")==0 ) {
 			str += "%<*NumPacketsHP25minSPvar7>";
 			sprintf(buf,"%d",_source->getSent().at(7));
 			buf[19] = '\0';
@@ -1352,7 +1428,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 	} else if( _nofCoS==3 ) {	// TODO
 		// most simple approach
 		// HP max 75 %
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75max_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N3HP75maxSPmin")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP75maxSPmin2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1377,7 +1453,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75max_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP75maxSPmax")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP75maxSPmax2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1402,7 +1478,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75max_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP75maxSPvar")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP75maxSPvar2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1428,7 +1504,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			return;
 		}
 		// HP max 25%
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25max_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N3HP25maxSPmin")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP25maxSPmin2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1454,7 +1530,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25max_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP25maxSPmax")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP25maxSPmax2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1479,7 +1555,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25max_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP25maxSPvar")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP25maxSPvar2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1505,9 +1581,9 @@ void Sink::writeNumbers2TexFile(string filename) {
 			return;
 		}
 
-		//"data_N3_HP75min_SPmin.txt", "data_N3_HP75min_SPmax.txt", "data_N3_HP75min_SPvar.txt", "data_N3_HP25min_SPmin.txt", "data_N3_HP25min_SPmax.txt", "data_N3_HP25min_SPvar.txt"
+		//"N3HP75minSPmin", "N3HP75minSPmax", "N3HP75minSPvar", "N3HP25minSPmin", "N3HP25minSPmax", "N3HP25minSPvar"
 		// HP min 75 %
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75min_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N3HP75minSPmin")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP75minSPmin2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1532,7 +1608,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75min_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP75minSPmax")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP75minSPmax2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1557,7 +1633,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP75min_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP75minSPvar")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP75minSPvar2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1583,7 +1659,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			return;
 		}
 		// HP min 25%
-		if( strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25min_SPmin.txt")==0 ) {
+		if( strcmp(_source->getInputDataFileName().c_str(), "N3HP25minSPmin")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP25minSPmin2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1608,7 +1684,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25min_SPmax.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP25minSPmax")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP25minSPmax2>";
 			sprintf(buf,"%d", _source->getSent().at(2));
@@ -1633,7 +1709,7 @@ void Sink::writeNumbers2TexFile(string filename) {
 			str = "";
 			return;
 		}
-		if (strcmp(_source->getInputDataFileName().c_str(), "data_N3_HP25min_SPvar.txt")==0 ) {
+		if (strcmp(_source->getInputDataFileName().c_str(), "N3HP25minSPvar")==0 ) {
 			str = "";
 			str += "%<*NumPacketsHP25minSPvar2>";
 			sprintf(buf,"%d", _source->getSent().at(2));

@@ -107,11 +107,13 @@ class QUEUEING_API Sink : public cSimpleModule
 	void writeDropped2FilePercentage(string filename);
 	void writeTimes2File(string filename);
 	void writeQueuingSchedulingTimes2File(string filename);
+	void writeQueuingSchedulingTimes2File4Table(string filename);
 
 	void writeTimes2File4Plot(string filename);
 	void writeQueuingTimes2File4Plot(string filename);
 	void writeDropped2File4Plot(string filename);
 	void writeDropped2File4PlotPercentage(string filename);
+	void writeDropped2FilePercentage4Table(string filename);
 
 	bool file_delete(std::string filename) {
 		if( unlink( filename.c_str() ) != 0)

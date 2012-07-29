@@ -1,6 +1,6 @@
 #! /bin/sh
 
-NED8=WRS_N8
+NED3=WRS_N3
 
 #EDIR=../out/gcc-debug/src
 EDIR=../out/gcc-release/src
@@ -13,7 +13,7 @@ chmod +x $EDIR/$EXECUTABLE
 
 rm -rf *.csv *.tex
 
-./$EDIR/$EXECUTABLE -f omnetppN8maxHP.ini -u Cmdenv -c $NED8
-mkdir N8HPmax
-mv *.csv N8HPmax
-mv *.tex N8HPmax
+./$EDIR/$EXECUTABLE -f omnetppN3minHP.ini -u Cmdenv -c $NED3
+mkdir N3HPmin
+mv *.csv N3HPmin
+mv *.tex N3HPmin
