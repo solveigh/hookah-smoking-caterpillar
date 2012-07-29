@@ -311,6 +311,20 @@ void Sink::writeQueuingSchedulingTimes2File4Table(string filename) {
 	char buf[250];
 
     if(_nofCoS==8) {
+    	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
+    		sprintf(buf,"Scenario,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf",
+    				7,7.0,7.0,
+    				6,6.0,6.0,
+    				5,5.0,5.0,
+    				4,4.0,4.0,
+    				3,3.0,3.0,
+    				2,2.0,2.0,
+    				1,1.0,1.0,
+    				0,0.0,0.0
+    				);
+			str = string(buf);
+			Useful::getInstance()->appendToFile(filename, str);
+    	}
 		sprintf(buf,"%s,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf",
 				_source->getInputDataFileName().c_str(),
 				_source->getSent().at(7),avg_lifetime(vq7),avg_lifetime(vsch7),
@@ -324,6 +338,15 @@ void Sink::writeQueuingSchedulingTimes2File4Table(string filename) {
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
     } else if (_nofCoS==3) {
+    	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
+    		sprintf(buf,"Scenario,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf",
+     				2,2.0,2.0,
+    				1,1.0,1.0,
+    				0,0.0,0.0
+    				);
+			str = string(buf);
+			Useful::getInstance()->appendToFile(filename, str);
+    	}
 		sprintf(buf,"%s,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf", _source->getInputDataFileName().c_str(),
 				_source->getSent().at(2),avg_lifetime(vq2),avg_lifetime(vsch2),
 				_source->getSent().at(1),avg_lifetime(vq1),avg_lifetime(vsch1),
