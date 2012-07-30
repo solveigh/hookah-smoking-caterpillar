@@ -25,9 +25,9 @@ simple Source
         int numPackets = default(-1);               // number of jobs to be generated (-1 means no limit)
         volatile double interArrivalTime @unit(s); // time between generated jobs
 		volatile double ifg @unit(s); 				// time for interframe gap
-        double startTime @unit(s) = default(interArrivalTime); // when the module sends out the first packet
+        double startTime @unit(s) = default(0); // when the module sends out the first packet
     
-    	string inputDataFile = default("data_full_load.txt");
+    	string inputDataFile = default("");
     	int nofCoS = default(8);	// default: 7..0 
     gates:
         output pppg[] @labels(PPPFrame-conn);

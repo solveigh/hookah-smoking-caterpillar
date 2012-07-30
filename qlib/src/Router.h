@@ -57,6 +57,7 @@ class QUEUEING_API Router : public cSimpleModule
 
         cDatarateChannel *channel;
         IPassiveQueue *getQueue(int index);
+        simtime_t startTime;
         simtime_t serviceTime;
         // receive trigger messages
         cMessage *triggerServiceMsg;

@@ -50,9 +50,8 @@ void Source::initialize() {
 	_ifg = par("ifg");
 	
 	// schedule the first message timer for start time
-	scheduleAt(startTime, new cMessage("newJobTimer"));
-
 	startSendingPacket = new cMessage("startSendingPacket");
+	scheduleAt(startTime, startSendingPacket);
 
 	_inputDataFile = par("inputDataFile").stringValue();
 	_data = Useful::getInstance()->readDataList(_inputDataFile);
@@ -83,35 +82,73 @@ void Source::initialize() {
 void Source::handleMessage(cMessage *msg) {
 	ASSERT(msg->isSelfMessage());
 
-    if( (numCreated < numPackets) ) { //&& (stopTime < 0 || stopTime > simTime()) ) {
-
+#if 1
+	// synchronous sending of packets
+    if( (numCreated < numPackets) ) {
+    	// asynchronous arrival of new packets
         // reschedule the timer for the next message
 		// consider interArrivalTime and ifg
-		simtime_t nextPacket = _interArrivalTime + _ifg;
-        scheduleAt(simTime() + nextPacket, msg);
 
-        if( outQueue->length()>0 ) {
-        	WRPacket *packet = check_and_cast<WRPacket*>(outQueue->pop());
-        	sendPacket(packet);
-        }
-        else if (_data.size() > _nofCoS) {
+    	if( outQueue->length()>0 ) {
+			WRPacket *packet = check_and_cast<WRPacket*>(outQueue->pop());
+			sendPacket(packet);
+		}
+		else if (_data.size() > 0) {
         	vector<PacketDescription>::iterator it;
 			it = _data.begin();
 			if (it != _data.end()) {
 				int prio = (*it).getPriority();
 				WRPacket *p = generatePacket(prio, (*it).getSize());
 				numCreated++;
-				sendPacket(p);
+
+				simtime_t t = sendPacket(p);
 				_data.erase(it);
+
+				// send next packet when finished with the current one
+				//cout << "schedule next: " << simTime() + t + _ifg << endl;
+				// FIXME this doesn't work properly
+				//scheduleAt(simTime() + t + _ifg, msg);
 			}
         }
     } else {
         // finished
         delete msg;
     }
+
+#else
+    if( (numCreated < numPackets) ) {
+    	// asynchronous arrival of new packets
+        // reschedule the timer for the next message
+		// consider interArrivalTime and ifg
+    	simtime_t nextPacket = _interArrivalTime + _ifg;
+        //scheduleAt(simTime() + nextPacket, msg);
+
+        if( outQueue->length()>0 ) {
+        	WRPacket *packet = check_and_cast<WRPacket*>(outQueue->pop());
+        	sendPacket(packet);
+        }
+        else if (_data.size() > 0) {
+        	vector<PacketDescription>::iterator it;
+			it = _data.begin();
+			if (it != _data.end()) {
+				int prio = (*it).getPriority();
+				WRPacket *p = generatePacket(prio, (*it).getSize());
+				numCreated++;
+
+				simtime_t t = sendPacket(p);
+				_data.erase(it);
+				scheduleAt(simTime() + t, msg);	// synchronous sending of packets
+			}
+        }
+    } else {
+        // finished
+        delete msg;
+    }
+#endif
 } // handleMessage()
 
-int Source::sendPacket(WRPacket* packet) {
+simtime_t Source::sendPacket(WRPacket* packet) {
+#if 1
 	int prio = packet->getPriority();
 	cGate* outputgate = getGate(prio);
 	cDatarateChannel* channel = check_and_cast<cDatarateChannel *> (outputgate->getTransmissionChannel());
@@ -120,7 +157,32 @@ int Source::sendPacket(WRPacket* packet) {
 	//cout << "duration " << packet->getBitLength() << "/" << channel->getDatarate() << " = " << packet->getBitLength()/channel->getDatarate()  << " " << t << endl;
 	//cout << "finish: " << txFinishTime << " sim: " << simTime() << " packet: " << packet->getName() << " size: " << packet->getBitLength() << " bit, " << packet->getByteLength() << " byte."<< endl;
 
-	if( txFinishTime <= simTime() || !channel->isBusy() ) {
+	//cout << "finish: " << (simTime()+t) << " tmftime: " << txFinishTime << " simTime() " << simTime() << endl;
+	if( (simTime()+t) <= simTime() || !channel->isBusy() ) {
+		// channel free; send out packet immediately
+		send(packet, outputgate);
+		_sent.at(prio) = _sent.at(prio)+1;
+		// trigger new packet generation
+		scheduleAt((simTime()+t), startSendingPacket);
+	} else {
+		// store packet and schedule timer; when the timer expires,
+		// the packet should be removed from the queue and sent out
+		outQueue->insert(packet);
+		//cout << "outQueue: " << outQueue->length() << endl;
+	}
+
+	return txFinishTime;
+#else
+	int prio = packet->getPriority();
+	cGate* outputgate = getGate(prio);
+	cDatarateChannel* channel = check_and_cast<cDatarateChannel *> (outputgate->getTransmissionChannel());
+	simtime_t t = channel->calculateDuration(packet);
+	simtime_t txFinishTime = channel->getTransmissionFinishTime();
+	//cout << "duration " << packet->getBitLength() << "/" << channel->getDatarate() << " = " << packet->getBitLength()/channel->getDatarate()  << " " << t << endl;
+	//cout << "finish: " << txFinishTime << " sim: " << simTime() << " packet: " << packet->getName() << " size: " << packet->getBitLength() << " bit, " << packet->getByteLength() << " byte."<< endl;
+
+	//cout << "finish: " << (simTime()+t) << " tmftime: " << txFinishTime << " simTime() " << simTime() << endl;
+	if( (simTime()+txFinishTime) <= simTime() || !channel->isBusy() ) {
 		// channel free; send out packet immediately
 		send(packet, outputgate);
 		_sent.at(prio) = _sent.at(prio)+1;
@@ -131,7 +193,8 @@ int Source::sendPacket(WRPacket* packet) {
 		//cout << "outQueue: " << outQueue->length() << endl;
 	}
 
-	return _sent.at(prio);
+	return txFinishTime;
+#endif
 } // sendPacket()
 
 WRPacket * Source::generatePacket(int priority, int size) {

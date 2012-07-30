@@ -20,9 +20,10 @@ simple Router
     parameters:
         @group(Queueing);
         @display("i=block/routing");
-        string routingAlgorithm @enum("FCFS", "RR", "WRR", "SQF", "LQF", "WFQ", "FQSW") = default("Priority");
+        string routingAlgorithm @enum("FCFS", "RR", "WRR", "SQF", "LQF", "WFQ", "FQSW") = default("FCFS");
         volatile int randomGateIndex = default(intuniform(0, sizeof(out)-1));    // the destination gate in case of random routing
         
+        double startTime @unit(s) = default(0); // when the module sends out the first packet
         volatile double serviceTime @unit(s); // service time of a job
     	int nofCoS = default(8);	// default: 7..0
     	

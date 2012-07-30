@@ -15,6 +15,6 @@ rm -rf *.csv *.tex
 
 ./$EDIR/$EXECUTABLE -f omnetppN8minHP.ini -u Cmdenv -c $NED8
 mkdir N8HPmin
-mv *.csv N8HPmin
-mv *.tex N8HPmin
+#mv *.csv N8HPmin
+#mv *.tex N8HPmin
 

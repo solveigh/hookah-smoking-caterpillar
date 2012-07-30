@@ -120,8 +120,12 @@ void Router::initialize() {
 			outputgate->getTransmissionChannel());
 
 	serviceTime = par("serviceTime");
+	startTime = par("startTime");
+
+	// trigger first scheduling operation
 	triggerServiceMsg = new cMessage("triggerServiceMessage");
-	scheduleAt(serviceTime, triggerServiceMsg); // trigger starting requests
+	scheduleAt(startTime, triggerServiceMsg);
+	//scheduleAt(serviceTime, triggerServiceMsg); // trigger starting requests
 
 	// wrr
 	for (int i = 0; i < _nofCoS; i++) {
@@ -496,7 +500,7 @@ void Router::handleMessage(cMessage *msg) {
 				}
 				cancelEvent(triggerServiceMsg);
 
-				// TODO? schedule imagined finish of request? Is datarate relevant between queues and router?
+				// request finished, schedule next trigger event
 				triggerServiceMsg->setTimestamp();
 				scheduleAt(simTime() + serviceTime, triggerServiceMsg);
 			}
@@ -514,7 +518,6 @@ void Router::handleMessage(cMessage *msg) {
 				p->getTotalServiceTime()
 						+ (triggerServiceMsg->getArrivalTime()
 								- triggerServiceMsg->getSendingTime()));
-
 		send(p, "pppg");
 
 		// TODO remove this, not necessary

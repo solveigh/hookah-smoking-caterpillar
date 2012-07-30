@@ -46,6 +46,7 @@ class QUEUEING_API Source : public SourceBase
     private:
         simtime_t startTime;
         simtime_t stopTime;
+
         int numPackets;
         int numCreated;
         std::vector<PacketDescription> _data;
@@ -73,7 +74,7 @@ class QUEUEING_API Source : public SourceBase
         virtual void handleMessage(cMessage *msg);
 
         WRPacket * generatePacket( int priority, int size );
-        int sendPacket(WRPacket* packet);
+        simtime_t sendPacket(WRPacket* packet);
 
     public:
     	int getCreated() { return numCreated; };
