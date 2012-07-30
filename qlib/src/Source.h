@@ -74,7 +74,7 @@ class QUEUEING_API Source : public SourceBase
         virtual void handleMessage(cMessage *msg);
 
         WRPacket * generatePacket( int priority, int size );
-        simtime_t sendPacket(WRPacket* packet);
+        void sendPacket(WRPacket* packet);
 
     public:
     	int getCreated() { return numCreated; };
