@@ -589,6 +589,21 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 	string str;
 	char buf[200];
 	if( _nofCoS==8 ) {
+    	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
+    		sprintf(buf,"Scenario,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
+    				7,7,7.0,
+    				6,6,6.0,
+    				5,5,5.0,
+    				4,4,4.0,
+    				3,3,3.0,
+    				2,2,2.0,
+    				1,1,1.0,
+    				0,0,0.0
+    				);
+			str = string(buf);
+			Useful::getInstance()->appendToFile(filename, str);
+    	}
+
 		double d0=0., d1=0., d2=0., d3=0., d4=0., d5=0., d6=0., d7=0.;
 		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
 		d7 = perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7));
@@ -612,6 +627,16 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
 	} else if(_nofCoS==3) {
+		if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
+			sprintf(buf,"Scenario,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
+					2,2,2.0,
+					1,1,1.0,
+					0,0,0.0
+					);
+			str = string(buf);
+			Useful::getInstance()->appendToFile(filename, str);
+		}
+
 		double d0=0., d1=0., d2=0.;
 		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
