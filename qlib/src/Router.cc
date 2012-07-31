@@ -333,10 +333,44 @@ void Router::handleMessage(cMessage *msg) {
 			//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
 			break;
 		case ALG_RR: // N=8, N=3
-			if (_priorityCounter < 0)
+#if 1
+			if (_priorityCounter < 0)	// reset
 				_priorityCounter = _nofCoS-1;
 			queueIndex = _priorityCounter;
 			_priorityCounter--;
+#else
+			/*maciej lipinski, cern, email 10.01.2012
+			1. wait for the current package to be sent (regardless off the priority)
+			2. priority = 7
+			3. while (priority >= 0) {
+			4.      if (outputQueue[priority] is not empty )
+			5.          send frame from the queue of priority
+			6.      else
+			7.          priority-- }*/
+
+
+			// FIXME RR should be better if the queue length is considered during selection
+			//if (_priorityCounter < 0)
+				//_priorityCounter = _nofCoS-1;
+			//if( _priorityCounter<0 )	// reset
+			//	_priorityCounter = _nofCoS-1;
+
+			_priorityCounter = _nofCoS-1;
+			// go through queues until you find a packet
+			while(_priorityCounter>0) {
+				if( getQueue(_priorityCounter)->length()>0 ) {
+					queueIndex=_priorityCounter;
+					break;
+				} else {
+					_priorityCounter--;
+				}
+				if (_priorityCounter < 0) {	// reset + break
+					_priorityCounter = _nofCoS-1;
+					break;
+				}
+			}
+			//queueIndex = _priorityCounter;
+#endif
 			//cout << "priority chosen: " << queueIndex << endl;
 			break;
 		case ALG_FCFS: // N=8, N=3

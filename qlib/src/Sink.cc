@@ -245,7 +245,7 @@ void Sink::writeTimes2File(string filename) {
 		sprintf(buf,"Priority,7 (%d), 6 (%d),5 (%d),4 (%d),3 (%d),2 (%d),1 (%d),0 (%d)", _source->getSent().at(7), _source->getSent().at(6), _source->getSent().at(5), _source->getSent().at(4), _source->getSent().at(3), _source->getSent().at(2), _source->getSent().at(1),_source->getSent().at(0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf,"%s,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf", _router->getSchedulingAlgorithm().c_str(),avg_lifetime(vq7), avg_lifetime(vq6), avg_lifetime(vq5), avg_lifetime(vq4),
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(),avg_lifetime(vq7), avg_lifetime(vq6), avg_lifetime(vq5), avg_lifetime(vq4),
 		avg_lifetime(vq3), avg_lifetime(vq2), avg_lifetime(vq1), avg_lifetime(vq0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
@@ -253,7 +253,7 @@ void Sink::writeTimes2File(string filename) {
 		sprintf(buf,"Priority,2 (%d),1 (%d),0 (%d)", _source->getSent().at(2), _source->getSent().at(1),_source->getSent().at(0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf,"%s,%2.2lf,%2.2lf,%2.2lf", _router->getSchedulingAlgorithm().c_str(), avg_lifetime(vq2), avg_lifetime(vq1), avg_lifetime(vq0));
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(), avg_lifetime(vq2), avg_lifetime(vq1), avg_lifetime(vq0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
     }
@@ -277,7 +277,7 @@ void Sink::writeQueuingSchedulingTimes2File(string filename) {
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
     	}
-		sprintf(buf,"%s,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(),
 				avg_lifetime(vq7),avg_lifetime(vsch7),
 				avg_lifetime(vq6),avg_lifetime(vsch6),
 				avg_lifetime(vq5),avg_lifetime(vsch5),
@@ -297,7 +297,7 @@ void Sink::writeQueuingSchedulingTimes2File(string filename) {
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
     	}
-		sprintf(buf,"%s,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf,%2.2lf", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(),
 				avg_lifetime(vq2),avg_lifetime(vsch2),
 				avg_lifetime(vq1),avg_lifetime(vsch1),
 				avg_lifetime(vq0),avg_lifetime(vsch0));
@@ -312,20 +312,20 @@ void Sink::writeQueuingSchedulingTimes2File4Table(string filename) {
 
     if(_nofCoS==8) {
     	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-    		sprintf(buf,"Scenario,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf",
+    		sprintf(buf,"Scenario,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf",
     				7,7.0,7.0,
     				6,6.0,6.0,
     				5,5.0,5.0,
     				4,4.0,4.0,
     				3,3.0,3.0,
-    				2,2.0,2.0,
+    				2,0.0,2.0,
     				1,1.0,1.0,
     				0,0.0,0.0
     				);
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
     	}
-		sprintf(buf,"%s,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf",
+		sprintf(buf,"%s,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf",
 				_source->getInputDataFileName().c_str(),
 				_source->getSent().at(7),avg_lifetime(vq7),avg_lifetime(vsch7),
 				_source->getSent().at(6),avg_lifetime(vq6),avg_lifetime(vsch6),
@@ -339,15 +339,15 @@ void Sink::writeQueuingSchedulingTimes2File4Table(string filename) {
 		Useful::getInstance()->appendToFile(filename, str);
     } else if (_nofCoS==3) {
     	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-    		sprintf(buf,"Scenario,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf",
-     				2,2.0,2.0,
+    		sprintf(buf,"Scenario,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf",
+     				2,0.0,2.0,
     				1,1.0,1.0,
     				0,0.0,0.0
     				);
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
     	}
-		sprintf(buf,"%s,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf,%d,%2.2lf,%2.2lf", _source->getInputDataFileName().c_str(),
+		sprintf(buf,"%s,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf,%d,%2.0lf,%2.0lf", _source->getInputDataFileName().c_str(),
 				_source->getSent().at(2),avg_lifetime(vq2),avg_lifetime(vsch2),
 				_source->getSent().at(1),avg_lifetime(vq1),avg_lifetime(vsch1),
 				_source->getSent().at(0),avg_lifetime(vq0),avg_lifetime(vsch0));
@@ -364,29 +364,29 @@ void Sink::writeQueuingTimes2File4Plot(string filename) {
 	string str;
 	char buf[20];
 	if( _nofCoS==8 ) {
-		sprintf(buf,"7 %2.2lf", avg_lifetime(vq7));
+		sprintf(buf,"7 %2.0lf", avg_lifetime(vq7));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"6 %2.2lf", avg_lifetime(vq6));
+		sprintf(buf,"6 %2.0lf", avg_lifetime(vq6));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"5 %2.2lf", avg_lifetime(vq5));
+		sprintf(buf,"5 %2.0lf", avg_lifetime(vq5));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"4 %2.2lf", avg_lifetime(vq4));
+		sprintf(buf,"4 %2.0lf", avg_lifetime(vq4));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"3 %2.2lf", avg_lifetime(vq3));
+		sprintf(buf,"3 %2.0lf", avg_lifetime(vq3));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
 	}
-	sprintf(buf,"2 %2.2lf",	avg_lifetime(vq2));
+	sprintf(buf,"2 %2.0lf",	avg_lifetime(vq2));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"1 %2.2lf", avg_lifetime(vq1));
+	sprintf(buf,"1 %2.0lf", avg_lifetime(vq1));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"0 %2.2lf", avg_lifetime(vq0));
+	sprintf(buf,"0 %2.0lf", avg_lifetime(vq0));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
 } //writeQueuingTimes2File4Plot()
@@ -399,29 +399,29 @@ void Sink::writeTimes2File4Plot(string filename) {
 	string str;
 	char buf[20];
 	if( _nofCoS==8 ) {
-		sprintf(buf,"7 %2.2lf", avg_lifetime(vsch7));
+		sprintf(buf,"7 %2.0lf", avg_lifetime(vsch7));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"6 %2.2lf", avg_lifetime(vsch6));
+		sprintf(buf,"6 %2.0lf", avg_lifetime(vsch6));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"5 %2.2lf", avg_lifetime(vsch5));
+		sprintf(buf,"5 %2.0lf", avg_lifetime(vsch5));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"4 %2.2lf", avg_lifetime(vsch4));
+		sprintf(buf,"4 %2.0lf", avg_lifetime(vsch4));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"3 %2.2lf", avg_lifetime(vsch3));
+		sprintf(buf,"3 %2.0lf", avg_lifetime(vsch3));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
 	}
-	sprintf(buf,"2 %2.2lf",	avg_lifetime(vsch2));
+	sprintf(buf,"2 %2.0lf",	avg_lifetime(vsch2));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"1 %2.2lf", avg_lifetime(vsch1));
+	sprintf(buf,"1 %2.0lf", avg_lifetime(vsch1));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"0 %2.2lf", avg_lifetime(vsch0));
+	sprintf(buf,"0 %2.0lf", avg_lifetime(vsch0));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
 } //writeTimes2File4Plot()
@@ -514,29 +514,29 @@ void Sink::writeDropped2File4PlotPercentage(string filename) {
 	string str;
 	char buf[20];
 	if( _nofCoS==8 ) {
-		sprintf(buf,"7 %2.2lf", perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7)));
+		sprintf(buf,"7 %2.0lf", perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"6 %2.2lf", perc(_qs.at(6)->getDropped().size(),_source->getSent().at(6)));
+		sprintf(buf,"6 %2.0lf", perc(_qs.at(6)->getDropped().size(),_source->getSent().at(6)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"5 %2.2lf", perc(_qs.at(5)->getDropped().size(),_source->getSent().at(5)));
+		sprintf(buf,"5 %2.0lf", perc(_qs.at(5)->getDropped().size(),_source->getSent().at(5)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"4 %2.2lf", perc(_qs.at(4)->getDropped().size(),_source->getSent().at(4)));
+		sprintf(buf,"4 %2.0lf", perc(_qs.at(4)->getDropped().size(),_source->getSent().at(4)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"3 %2.2lf", perc(_qs.at(3)->getDropped().size(),_source->getSent().at(3)));
+		sprintf(buf,"3 %2.0lf", perc(_qs.at(3)->getDropped().size(),_source->getSent().at(3)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
 	}
-	sprintf(buf,"2 %2.2lf", perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2)));
+	sprintf(buf,"2 %2.0lf", perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2)));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"1 %2.2lf", perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1)));
+	sprintf(buf,"1 %2.0lf", perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1)));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"0 %2.2lf", perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0)));
+	sprintf(buf,"0 %2.0lf", perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0)));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
 } //writeDropped2File4PlotPercentage()
@@ -562,7 +562,7 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%2.2lf,%d,%2.2lf,%d,%2.2lf,%d,%2.2lf,%d,%2.2lf,%d,%2.2lf,%d,%2.2lf,%d,%2.2lf", _router->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(), d7,
+		sprintf(buf,"%s,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf", _router->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(), d7,
 				_qs.at(6)->getDropped().size(), d6, _qs.at(5)->getDropped().size(), d5, _qs.at(4)->getDropped().size(), d4, _qs.at(3)->getDropped().size(), d3,
 				_qs.at(2)->getDropped().size(), d2, _qs.at(1)->getDropped().size(), d1, _qs.at(0)->getDropped().size(), d0);
 		str = string(buf);
@@ -578,7 +578,7 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%2.2lf,%d,%2.2lf,%d,%2.2lf", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf", _router->getSchedulingAlgorithm().c_str(),
 				_qs.at(2)->getDropped().size(), d2, _qs.at(1)->getDropped().size(), d1, _qs.at(0)->getDropped().size(), d0);
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
@@ -590,20 +590,19 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 	char buf[200];
 	if( _nofCoS==8 ) {
     	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-    		sprintf(buf,"Scenario,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
+    		sprintf(buf,"Scenario,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf",
     				7,7,7.0,
     				6,6,6.0,
     				5,5,5.0,
     				4,4,4.0,
     				3,3,3.0,
-    				2,2,2.0,
+    				2,0,2.0,
     				1,1,1.0,
     				0,0,0.0
     				);
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
     	}
-
 		double d0=0., d1=0., d2=0., d3=0., d4=0., d5=0., d6=0., d7=0.;
 		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
 		d7 = perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7));
@@ -614,7 +613,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
+		sprintf(buf,"%s,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf",
 				_source->getInputDataFileName().c_str(),
 				_source->getSent().at(7),_qs.at(7)->getDropped().size(), d7,
 				_source->getSent().at(6),_qs.at(6)->getDropped().size(), d6,
@@ -627,22 +626,21 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
 	} else if(_nofCoS==3) {
-		if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-			sprintf(buf,"Scenario,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
-					2,2,2.0,
-					1,1,1.0,
-					0,0,0.0
-					);
+    	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
+    		sprintf(buf,"Scenario,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf",
+    				2,0,2.0,
+    				1,1,1.0,
+    				0,0,0.0
+    				);
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
-		}
-
+    	}
 		double d0=0., d1=0., d2=0.;
 		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf", _source->getInputDataFileName().c_str(),
+		sprintf(buf,"%s,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf", _source->getInputDataFileName().c_str(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(), d2,
 				_source->getSent().at(1), _qs.at(1)->getDropped().size(), d1,
 				_source->getSent().at(0), _qs.at(0)->getDropped().size(), d0);
@@ -660,29 +658,29 @@ void Sink::write2File(string filename) {
 	Useful::getInstance()->appendToFile(filename, _router->getSchedulingAlgorithm());
 	Useful::getInstance()->appendToFile(filename, _source->getInputDataFileName());
 	if( _nofCoS==8 ) {
-		sprintf(buf,"%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
+		sprintf(buf,"%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf,"%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v6), avg_lifetime(vq6), avg_lifetime(vs6), _source->getSent().at(6), _qs.at(6)->getDropped().size());
+		sprintf(buf,"%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v6), avg_lifetime(vq6), avg_lifetime(vs6), _source->getSent().at(6), _qs.at(6)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf, "%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v5), avg_lifetime(vq5), avg_lifetime(vs5), _source->getSent().at(5), _qs.at(5)->getDropped().size());
+		sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v5), avg_lifetime(vq5), avg_lifetime(vs5), _source->getSent().at(5), _qs.at(5)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf, "%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v4), avg_lifetime(vq4), avg_lifetime(vs4), _source->getSent().at(4), _qs.at(4)->getDropped().size());
+		sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v4), avg_lifetime(vq4), avg_lifetime(vs4), _source->getSent().at(4), _qs.at(4)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf, "%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v3), avg_lifetime(vq3), avg_lifetime(vs3), _source->getSent().at(3), _qs.at(3)->getDropped().size());
+		sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v3), avg_lifetime(vq3), avg_lifetime(vs3), _source->getSent().at(3), _qs.at(3)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
 	}
-	sprintf(buf, "%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
+	sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
 	str = string(buf);
 	Useful::getInstance()->appendToFile(filename, str);
-	sprintf(buf, "%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v1), avg_lifetime(vq1), avg_lifetime(vs1), _source->getSent().at(1), _qs.at(1)->getDropped().size());
+	sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v1), avg_lifetime(vq1), avg_lifetime(vs1), _source->getSent().at(1), _qs.at(1)->getDropped().size());
 	str = string(buf);
 	Useful::getInstance()->appendToFile(filename, str);
-	sprintf(buf, "%2.2lf,%2.2lf,%2.2lf,%d,%d", avg_lifetime(v0), avg_lifetime(vq0), avg_lifetime(vs0), _source->getSent().at(0), _qs.at(0)->getDropped().size());
+	sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v0), avg_lifetime(vq0), avg_lifetime(vs0), _source->getSent().at(0), _qs.at(0)->getDropped().size());
 	str = string(buf);
 	Useful::getInstance()->appendToFile(filename, str);
 

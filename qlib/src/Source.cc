@@ -117,7 +117,11 @@ void Source::sendPacket(WRPacket* packet) {
 		send(packet, outputgate);
 		_sent.at(prio) = _sent.at(prio)+1;
 		// trigger new packet generation
+		// immediately send the next packet (full load)
 		scheduleAt((simTime()+t+_ifg), startSendingPacket);
+
+		// allow some time between two new packets (lower load)
+		//scheduleAt((simTime()+t+_ifg+_interArrivalTime), startSendingPacket);
 	}
 
 	return;

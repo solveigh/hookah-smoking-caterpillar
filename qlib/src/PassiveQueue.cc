@@ -64,7 +64,7 @@ void PassiveQueue::enqueue(cPacket* msg) {
 
 	// Tail-Drop: Drop newly arriving packet
 	// check for container capacity
-	if ((_capacity >= 0) && (queue.length() >= _capacity) && (size()>_size)) {
+	if ( (queue.length() >= _capacity) || (size()>_size)) {
 		_dropped.push_back(job);
 		EV << "Queue full! Packet dropped.\n";
 		if (ev.isGUI())
