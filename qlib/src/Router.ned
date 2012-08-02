@@ -37,6 +37,17 @@ simple Router
     	int weight2 = default(3);	// weight used in WFQ
     	int weight1 = default(3);	// weight used in WFQ
     	int weight0 = default(3);	// weight used in WFQ
+
+    	// N=8
+    	int wrr_weight7 = default(10);	// weight used in WRR
+    	int wrr_weight6 = default(6);	// weight used in WRR
+    	int wrr_weight5 = default(5);	// weight used in WRR
+    	int wrr_weight4 = default(4);	// weight used in WRR
+    	int wrr_weight3 = default(3);	// weight used in WRR
+    	// N=8 / N=3
+    	int wrr_weight2 = default(3);	// weight used in WRR
+    	int wrr_weight1 = default(2);	// weight used in WRR
+    	int wrr_weight0 = default(1);	// weight used in WRR
     	
     gates:
         input in[];

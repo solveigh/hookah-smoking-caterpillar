@@ -72,6 +72,17 @@ void Router::initialize() {
 			wfq_weight[0] = _weight0;
 
 			// WRR
+#if 1
+			weight[7] = par("wrr_weight7");
+			weight[6] = par("wrr_weight6");
+			weight[5] = par("wrr_weight5");
+			weight[4] = par("wrr_weight4");
+			weight[3] = par("wrr_weight3");
+			weight[2] = par("wrr_weight2");
+			weight[1] = par("wrr_weight1");
+			weight[0] = par("wrr_weight0");
+
+#else
 			weight[7] = _weight7;	// TODO lower weights may not get 0!!!
 			weight[6] = _weight7 - 1;
 			weight[5] = _weight7 - 2;
@@ -80,7 +91,7 @@ void Router::initialize() {
 			weight[2] = _weight7 - 3;
 			weight[1] = _weight7 - 3;
 			weight[0] = _weight7 - 4;
-
+#endif
 			// priority
 			_priorityCounter = 7;
 

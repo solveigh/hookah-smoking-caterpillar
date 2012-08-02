@@ -14,8 +14,12 @@ namespace qlib {
 
 Define_Module(Sink);
 
-inline double s2mus(double s) {
+inline double s2us(double s) {
 	return (s * 1000000);	// x 10e6
+}
+
+inline double s2ns(double s) {
+	return (s * 1000000000);	// x 10e9
 }
 
 double Sink::perc(int dropped, int sent) {
@@ -158,21 +162,21 @@ void Sink::finish() {
 	//cout << __FILE__ << " received: " <<  numReceived << endl;
 
 	// overview
-	cout << this->getName() << ": CoS: " << _qs.size() << " " << _router->getSchedulingAlgorithm() << endl;
+	cout << this->getName() << ": CoS: " << _qs.size() << " " << _router->getSchedulingAlgorithm() << " Scenario: " << _source->getInputDataFileName() << endl;
 
 	if(_nofCoS==8) {
-		std::cout << "p 0: avg " << avg_lifetime(v0) << " us size " << v0.size() << " Q time: " << avg_lifetime(vq0) << " us S time: " << avg_lifetime(vsch0) << " us sent: " << _source->getSent().at(0) << " dropped " << _qs.at(0)->getDropped().size() << "( " << (double(_qs.at(0)->getDropped().size())/double(_source->getSent().at(0)))*100.0 << "%)" << std::endl;
-		std::cout << "p 1: avg " << avg_lifetime(v1) << " us size " << v1.size() << " Q time: " << avg_lifetime(vq1) << " us S time: " << avg_lifetime(vsch1) << " us sent: " << _source->getSent().at(1) << " dropped " << _qs.at(1)->getDropped().size() << "( " << (double(_qs.at(1)->getDropped().size())/double(_source->getSent().at(1)))*100.0 << "%)" << std::endl;
-		std::cout << "p 2: avg " << avg_lifetime(v2) << " us size " << v2.size() << " Q time: " << avg_lifetime(vq2) << " us S time: " << avg_lifetime(vsch2) << " us sent: " << _source->getSent().at(2) << " dropped " << _qs.at(2)->getDropped().size() << "( " << (double(_qs.at(2)->getDropped().size())/double(_source->getSent().at(2)))*100.0 << "%)" << std::endl;
-		std::cout << "p 3: avg " << avg_lifetime(v3) << " us size " << v3.size() << " Q time: " << avg_lifetime(vq3) << " us S time: " << avg_lifetime(vsch3) << " us sent: " << _source->getSent().at(3) << " dropped " << _qs.at(3)->getDropped().size() << "( " << (double(_qs.at(3)->getDropped().size())/double(_source->getSent().at(3)))*100.0 << "%)" << std::endl;
-		std::cout << "p 4: avg " << avg_lifetime(v4) << " us size " << v4.size() << " Q time: " << avg_lifetime(vq4) << " us S time: " << avg_lifetime(vsch4) << " us sent: " << _source->getSent().at(4) << " dropped " << _qs.at(4)->getDropped().size() << "( " << (double(_qs.at(4)->getDropped().size())/double(_source->getSent().at(4)))*100.0 << "%)" << std::endl;
-		std::cout << "p 5: avg " << avg_lifetime(v5) << " us size " << v5.size() << " Q time: " << avg_lifetime(vq5) << " us S time: " << avg_lifetime(vsch5) << " us sent: " << _source->getSent().at(5) << " dropped " << _qs.at(5)->getDropped().size() << "( " << (double(_qs.at(5)->getDropped().size())/double(_source->getSent().at(5)))*100.0 << "%)" << std::endl;
-		std::cout << "p 6: avg " << avg_lifetime(v6) << " us size " << v6.size() << " Q time: " << avg_lifetime(vq6) << " us S time: " << avg_lifetime(vsch6) << " us sent: " << _source->getSent().at(6) << " dropped " << _qs.at(6)->getDropped().size() << "( " << (double(_qs.at(6)->getDropped().size())/double(_source->getSent().at(6)))*100.0 << "%)" << std::endl;
-		std::cout << "p 7: avg " << avg_lifetime(v7) << " us size " << v7.size() << " Q time: " << avg_lifetime(vq7) << " us S time: " << avg_lifetime(vsch7) << " us sent: " << _source->getSent().at(7) << " dropped " << _qs.at(7)->getDropped().size() << "( " << (double(_qs.at(7)->getDropped().size())/double(_source->getSent().at(7)))*100.0 << "%)" << std::endl;
+		std::cout << "p 0: avg " << avg_lifetime(v0) << " ns size " << v0.size() << " Q time: " << avg_lifetime(vq0) << " ns "<</*S time: " << avg_lifetime(vsch0) << " ns*/ " sent: " << _source->getSent().at(0) << " dropped " << _qs.at(0)->getDropped().size() << "( " << (double(_qs.at(0)->getDropped().size())/double(_source->getSent().at(0)))*100.0 << "%)" << std::endl;
+		std::cout << "p 1: avg " << avg_lifetime(v1) << " ns size " << v1.size() << " Q time: " << avg_lifetime(vq1) << " ns "<</*S time: " << avg_lifetime(vsch1) << " ns*/ " sent: " << _source->getSent().at(1) << " dropped " << _qs.at(1)->getDropped().size() << "( " << (double(_qs.at(1)->getDropped().size())/double(_source->getSent().at(1)))*100.0 << "%)" << std::endl;
+		std::cout << "p 2: avg " << avg_lifetime(v2) << " ns size " << v2.size() << " Q time: " << avg_lifetime(vq2) << " ns "<</*S time: " << avg_lifetime(vsch2) << " ns*/ " sent: " << _source->getSent().at(2) << " dropped " << _qs.at(2)->getDropped().size() << "( " << (double(_qs.at(2)->getDropped().size())/double(_source->getSent().at(2)))*100.0 << "%)" << std::endl;
+		std::cout << "p 3: avg " << avg_lifetime(v3) << " ns size " << v3.size() << " Q time: " << avg_lifetime(vq3) << " ns "<</*S time: " << avg_lifetime(vsch3) << " ns*/ " sent: " << _source->getSent().at(3) << " dropped " << _qs.at(3)->getDropped().size() << "( " << (double(_qs.at(3)->getDropped().size())/double(_source->getSent().at(3)))*100.0 << "%)" << std::endl;
+		std::cout << "p 4: avg " << avg_lifetime(v4) << " ns size " << v4.size() << " Q time: " << avg_lifetime(vq4) << " ns "<</*S time: " << avg_lifetime(vsch4) << " ns*/ " sent: " << _source->getSent().at(4) << " dropped " << _qs.at(4)->getDropped().size() << "( " << (double(_qs.at(4)->getDropped().size())/double(_source->getSent().at(4)))*100.0 << "%)" << std::endl;
+		std::cout << "p 5: avg " << avg_lifetime(v5) << " ns size " << v5.size() << " Q time: " << avg_lifetime(vq5) << " ns "<</*S time: " << avg_lifetime(vsch5) << " ns*/ " sent: " << _source->getSent().at(5) << " dropped " << _qs.at(5)->getDropped().size() << "( " << (double(_qs.at(5)->getDropped().size())/double(_source->getSent().at(5)))*100.0 << "%)" << std::endl;
+		std::cout << "p 6: avg " << avg_lifetime(v6) << " ns size " << v6.size() << " Q time: " << avg_lifetime(vq6) << " ns "<</*S time: " << avg_lifetime(vsch6) << " ns*/ " sent: " << _source->getSent().at(6) << " dropped " << _qs.at(6)->getDropped().size() << "( " << (double(_qs.at(6)->getDropped().size())/double(_source->getSent().at(6)))*100.0 << "%)" << std::endl;
+		std::cout << "p 7: avg " << avg_lifetime(v7) << " ns size " << v7.size() << " Q time: " << avg_lifetime(vq7) << " ns "<</*S time: " << avg_lifetime(vsch7) << " ns*/ " sent: " << _source->getSent().at(7) << " dropped " << _qs.at(7)->getDropped().size() << "( " << (double(_qs.at(7)->getDropped().size())/double(_source->getSent().at(7)))*100.0 << "%)" << std::endl;
 	} else if(_nofCoS==3) {
-		std::cout << "p 0: avg " << avg_lifetime(v0) << " us size " << v0.size() << " Q time: " << avg_lifetime(vq0) << " us S time: " << avg_lifetime(vsch0) << " us sent: " << _source->getSent().at(0) << " dropped " << _qs.at(0)->getDropped().size() << "( " << (double(_qs.at(0)->getDropped().size())/double(_source->getSent().at(0)))*100.0 << "%)" << std::endl;
-		std::cout << "p 1: avg " << avg_lifetime(v1) << " us size " << v1.size() << " Q time: " << avg_lifetime(vq1) << " us S time: " << avg_lifetime(vsch1) << " us sent: " << _source->getSent().at(1) << " dropped " << _qs.at(1)->getDropped().size() << "( " << (double(_qs.at(1)->getDropped().size())/double(_source->getSent().at(1)))*100.0 << "%)" << std::endl;
-		std::cout << "p 2: avg " << avg_lifetime(v2) << " us size " << v2.size() << " Q time: " << avg_lifetime(vq2) << " us S time: " << avg_lifetime(vsch2) << " us sent: " << _source->getSent().at(2) << " dropped " << _qs.at(2)->getDropped().size() << "( " << (double(_qs.at(2)->getDropped().size())/double(_source->getSent().at(2)))*100.0 << "%)" << std::endl;
+		std::cout << "p 0: avg " << avg_lifetime(v0) << " ns size " << v0.size() << " Q time: " << avg_lifetime(vq0) << " ns "<</*S time: " << avg_lifetime(vsch0) << " ns*/ " sent: " << _source->getSent().at(0) << " dropped " << _qs.at(0)->getDropped().size() << "( " << (double(_qs.at(0)->getDropped().size())/double(_source->getSent().at(0)))*100.0 << "%)" << std::endl;
+		std::cout << "p 1: avg " << avg_lifetime(v1) << " ns size " << v1.size() << " Q time: " << avg_lifetime(vq1) << " ns "<</*S time: " << avg_lifetime(vsch1) << " ns*/ " sent: " << _source->getSent().at(1) << " dropped " << _qs.at(1)->getDropped().size() << "( " << (double(_qs.at(1)->getDropped().size())/double(_source->getSent().at(1)))*100.0 << "%)" << std::endl;
+		std::cout << "p 2: avg " << avg_lifetime(v2) << " ns size " << v2.size() << " Q time: " << avg_lifetime(vq2) << " ns "<</*S time: " << avg_lifetime(vsch2) << " ns*/ " sent: " << _source->getSent().at(2) << " dropped " << _qs.at(2)->getDropped().size() << "( " << (double(_qs.at(2)->getDropped().size())/double(_source->getSent().at(2)))*100.0 << "%)" << std::endl;
 	}
 	determineQueueSizes();
 
@@ -514,29 +518,29 @@ void Sink::writeDropped2File4PlotPercentage(string filename) {
 	string str;
 	char buf[20];
 	if( _nofCoS==8 ) {
-		sprintf(buf,"7 %2.0lf", perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7)));
+		sprintf(buf,"7 %2.1lf", perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"6 %2.0lf", perc(_qs.at(6)->getDropped().size(),_source->getSent().at(6)));
+		sprintf(buf,"6 %2.1lf", perc(_qs.at(6)->getDropped().size(),_source->getSent().at(6)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"5 %2.0lf", perc(_qs.at(5)->getDropped().size(),_source->getSent().at(5)));
+		sprintf(buf,"5 %2.1lf", perc(_qs.at(5)->getDropped().size(),_source->getSent().at(5)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"4 %2.0lf", perc(_qs.at(4)->getDropped().size(),_source->getSent().at(4)));
+		sprintf(buf,"4 %2.1lf", perc(_qs.at(4)->getDropped().size(),_source->getSent().at(4)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
-		sprintf(buf,"3 %2.0lf", perc(_qs.at(3)->getDropped().size(),_source->getSent().at(3)));
+		sprintf(buf,"3 %2.1lf", perc(_qs.at(3)->getDropped().size(),_source->getSent().at(3)));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(fname, str);
 	}
-	sprintf(buf,"2 %2.0lf", perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2)));
+	sprintf(buf,"2 %2.1lf", perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2)));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"1 %2.0lf", perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1)));
+	sprintf(buf,"1 %2.1lf", perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1)));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
-	sprintf(buf,"0 %2.0lf", perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0)));
+	sprintf(buf,"0 %2.1lf", perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0)));
 	str = string(buf);
 	Useful::getInstance()->appendToFile(fname, str);
 } //writeDropped2File4PlotPercentage()
@@ -562,7 +566,7 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf", _router->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(), d7,
+		sprintf(buf,"%s,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf", _router->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(), d7,
 				_qs.at(6)->getDropped().size(), d6, _qs.at(5)->getDropped().size(), d5, _qs.at(4)->getDropped().size(), d4, _qs.at(3)->getDropped().size(), d3,
 				_qs.at(2)->getDropped().size(), d2, _qs.at(1)->getDropped().size(), d1, _qs.at(0)->getDropped().size(), d0);
 		str = string(buf);
@@ -578,7 +582,7 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%2.0lf,%d,%2.0lf,%d,%2.0lf", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf", _router->getSchedulingAlgorithm().c_str(),
 				_qs.at(2)->getDropped().size(), d2, _qs.at(1)->getDropped().size(), d1, _qs.at(0)->getDropped().size(), d0);
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
@@ -590,7 +594,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 	char buf[200];
 	if( _nofCoS==8 ) {
     	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-    		sprintf(buf,"Scenario,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf",
+    		sprintf(buf,"Scenario,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf",
     				7,7,7.0,
     				6,6,6.0,
     				5,5,5.0,
@@ -613,7 +617,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf",
+		sprintf(buf,"%s,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf",
 				_source->getInputDataFileName().c_str(),
 				_source->getSent().at(7),_qs.at(7)->getDropped().size(), d7,
 				_source->getSent().at(6),_qs.at(6)->getDropped().size(), d6,
@@ -627,7 +631,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		Useful::getInstance()->appendToFile(filename, str);
 	} else if(_nofCoS==3) {
     	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-    		sprintf(buf,"Scenario,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf",
+    		sprintf(buf,"Scenario,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf",
     				2,0,2.0,
     				1,1,1.0,
     				0,0,0.0
@@ -640,7 +644,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%d,%2.0lf,%d,%d,%2.0lf,%d,%d,%2.0lf", _source->getInputDataFileName().c_str(),
+		sprintf(buf,"%s,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf", _source->getInputDataFileName().c_str(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(), d2,
 				_source->getSent().at(1), _qs.at(1)->getDropped().size(), d1,
 				_source->getSent().at(0), _qs.at(0)->getDropped().size(), d0);
@@ -705,7 +709,7 @@ double Sink::avg_lifetime(vector<double> v) {
 		}
 		avg_lt /= v.size();
 		//std:: cout << "    lifetime " << avg_lt << "s = " << avg_lt / 1000.0 << "ms" << std::endl;
-		return s2mus((double) avg_lt);
+		return s2ns((double) avg_lt);
 	} else {
 		return 0.0;
 	}
@@ -720,7 +724,7 @@ double Sink::avg_lifetime(vector<simtime_t> v) {
 		}
 		avg_lt /= v.size();
 		//std:: cout << "    lifetime " << avg_lt << "s = " << avg_lt / 1000.0 << "ms" << std::endl;
-		return s2mus((double) avg_lt);
+		return s2ns((double) avg_lt);
 	} else {
 		return 0.0;
 	}
