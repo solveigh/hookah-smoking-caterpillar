@@ -14,6 +14,7 @@ qlib::Useful * qlib::Useful::_instance = 0;
 
 Useful::Useful() {
 	_instance = NULL;
+
 }
 
 Useful::~Useful() {
@@ -24,6 +25,14 @@ Useful *Useful::getInstance() {
 		_instance = new Useful();
 	}
 	return _instance;
+}
+
+void Useful::setBurstIntervals() {
+	// define intervals manually
+	for( int i=0; i<501; i++ ) {
+		_vecBurstIntervals.push_back(50);
+	}
+
 }
 
 double Useful::getTime(std::string name) {

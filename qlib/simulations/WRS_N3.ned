@@ -67,4 +67,5 @@ network WRS_N3
         queue2.out --> router.in++;
 
         router.pppg --> pppline --> GbpsSink.in;
+        source.saveBurstData --> GbpsSink.saveBurstData;
 }

@@ -40,7 +40,9 @@ void Sink::initialize() {
 	keepJobs = par("keepJobs");
 
 	_nofCoS = par("nofCoS");
-	cout << "Source nofCoS " << _nofCoS << endl;
+	cout << "Sink nofCoS " << _nofCoS << endl;
+
+	_burstTest = par("burstTest");
 
 	numReceived = 0;
 	WATCH(numReceived);
@@ -69,64 +71,127 @@ PassiveQueue *Sink::getQueue(int index) {
 
 void Sink::handleMessage(cMessage *msg) {
 
-	WRPacket *packet = check_and_cast<WRPacket *>(msg);
-	simtime_t lifetime = msg->getArrivalTime() - msg->getCreationTime();
-	//cout << simTime() << " " << __FILE__ << ": " << packet->getName() << " lifetime " << lifetime << endl;
-	numReceived++;
+	if( strcmp(msg->getName(),"saveBurstData")!=0 ) {
+		WRPacket *packet = check_and_cast<WRPacket *>(msg);
+		simtime_t lifetime = msg->getArrivalTime() - msg->getCreationTime();
+		//cout << simTime() << " " << __FILE__ << ": " << packet->getName() << " lifetime " << lifetime << endl;
+		numReceived++;
 
-	switch( packet->getPriority() ) {
-	case 0:
-		v0.push_back(lifetime);
-		vq0.push_back(packet->getTotalQueueingTime());
-		vs0.push_back(packet->getTotalServiceTime());
-		vsch0.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	case 1:
-		v1.push_back(lifetime);
-		vq1.push_back(packet->getTotalQueueingTime());
-		vs1.push_back(packet->getTotalServiceTime());
-		vsch1.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	case 2:
-		v2.push_back(lifetime);
-		vq2.push_back(packet->getTotalQueueingTime());
-		vs2.push_back(packet->getTotalServiceTime());
-		vsch2.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	case 3:
-		v3.push_back(lifetime);
-		vq3.push_back(packet->getTotalQueueingTime());
-		vs3.push_back(packet->getTotalServiceTime());
-		vsch3.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	case 4:
-		v4.push_back(lifetime);
-		vq4.push_back(packet->getTotalQueueingTime());
-		vs4.push_back(packet->getTotalServiceTime());
-		vsch4.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	case 5:
-		v5.push_back(lifetime);
-		vq5.push_back(packet->getTotalQueueingTime());
-		vs5.push_back(packet->getTotalServiceTime());
-		vsch5.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	case 6:
-		v6.push_back(lifetime);
-		vq6.push_back(packet->getTotalQueueingTime());
-		vs6.push_back(packet->getTotalServiceTime());
-		vsch6.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	case 7:
-		v7.push_back(lifetime);
-		vq7.push_back(packet->getTotalQueueingTime());
-		vs7.push_back(packet->getTotalServiceTime());
-		vsch7.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
-		break;
-	default:
-		break;
+		switch( packet->getPriority() ) {
+		case 0:
+			v0.push_back(lifetime);
+			vq0.push_back(packet->getTotalQueueingTime());
+			vs0.push_back(packet->getTotalServiceTime());
+			vsch0.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		case 1:
+			v1.push_back(lifetime);
+			vq1.push_back(packet->getTotalQueueingTime());
+			vs1.push_back(packet->getTotalServiceTime());
+			vsch1.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		case 2:
+			v2.push_back(lifetime);
+			vq2.push_back(packet->getTotalQueueingTime());
+			vs2.push_back(packet->getTotalServiceTime());
+			vsch2.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		case 3:
+			v3.push_back(lifetime);
+			vq3.push_back(packet->getTotalQueueingTime());
+			vs3.push_back(packet->getTotalServiceTime());
+			vsch3.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		case 4:
+			v4.push_back(lifetime);
+			vq4.push_back(packet->getTotalQueueingTime());
+			vs4.push_back(packet->getTotalServiceTime());
+			vsch4.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		case 5:
+			v5.push_back(lifetime);
+			vq5.push_back(packet->getTotalQueueingTime());
+			vs5.push_back(packet->getTotalServiceTime());
+			vsch5.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		case 6:
+			v6.push_back(lifetime);
+			vq6.push_back(packet->getTotalQueueingTime());
+			vs6.push_back(packet->getTotalServiceTime());
+			vsch6.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		case 7:
+			v7.push_back(lifetime);
+			vq7.push_back(packet->getTotalQueueingTime());
+			vs7.push_back(packet->getTotalServiceTime());
+			vsch7.push_back(calculateSchedulingTime(msg->getCreationTime(), simTime(), packet->getTotalQueueingTime()));
+			break;
+		default:
+			break;
+		}
+	} else {
+		if( _burstTest==true ) {
+			// write resultfiles
+
+			int burstCounter = _source->getBurstCounter();
+			int nofBursts = Useful::getInstance()->getBurstIntervals().at(burstCounter);
+			//cout << "burst interval of " << nofBursts << " now at " << nofBurstCounter << endl;
+
+			int nofCreated = _source->getCreated();
+			int nofArrived=-1;
+			if( _nofCoS==8 )
+				nofArrived = v0.size()+v1.size()+v2.size()+v3.size()+v4.size()+v5.size()+v6.size()+v7.size();
+			if( _nofCoS==3 )
+				nofArrived = v0.size()+v1.size()+v2.size();
+
+			if( _source->saveBurstData()==true && nofCreated==nofArrived) {
+				cout << "burst ctr " << burstCounter << " # bursts " << nofBursts << endl;
+				char buf[30];
+				sprintf(buf, "burst_%d_%d_", nofBursts, nofCreated);
+				string begin = string(buf);
+
+				cout << " created: " << nofCreated  << " arrived: " << nofArrived << endl;
+				cout << " End burst: " << simTime() << endl;
+
+				// create comma separated text file for easy evaluation
+				write2File("out.csv");
+
+				string fname = begin + string("dropped_");
+				//fname+=_router->getSchedulingAlgorithm();
+				//fname+="_";
+				fname+=_source->getInputDataFileName();
+				fname+=string(".csv");
+
+				writeDropped2File(fname);
+				writeDropped2File4Plot(fname);
+				writeDropped2File4PlotPercentage(fname);
+
+				fname = begin + string("dropped_perc_");
+				fname+=_source->getInputDataFileName();
+				fname+=string(".csv");
+				writeDropped2FilePercentage(fname);
+
+				fname = begin + string("times_");
+				fname+=_source->getInputDataFileName();
+				fname+=string(".csv");
+				writeQueuingSchedulingTimes2File(fname);
+
+				writeTimes2File4Plot(fname);
+				writeQueuingTimes2File4Plot(fname);
+
+				fname = begin + string("times_");
+				fname+=_router->getSchedulingAlgorithm();
+				fname+=string(".csv");
+				writeQueuingSchedulingTimes2File4Table(fname);
+
+				fname = begin + string("dropped_perc_");
+				fname+=_router->getSchedulingAlgorithm();
+				fname+=string(".csv");
+				writeDropped2FilePercentage4Table(fname);
+			}
+		} // if( _burstTest==true )
+		cancelAndDelete(msg);
 	}
-
 	canFinish();
 } // handleMessage()
 
@@ -661,30 +726,34 @@ void Sink::write2File(string filename) {
 	Useful::getInstance()->appendToFile(filename, this->getName() );
 	Useful::getInstance()->appendToFile(filename, _router->getSchedulingAlgorithm());
 	Useful::getInstance()->appendToFile(filename, _source->getInputDataFileName());
+
+	sprintf(buf,"Lifetime,\tQ-Time,\tS-Time,\tSent,\tDropped", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
+	str = string(buf);
+	Useful::getInstance()->appendToFile(filename, str);
 	if( _nofCoS==8 ) {
-		sprintf(buf,"%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
+		sprintf(buf,"%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf,"%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v6), avg_lifetime(vq6), avg_lifetime(vs6), _source->getSent().at(6), _qs.at(6)->getDropped().size());
+		sprintf(buf,"%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v6), avg_lifetime(vq6), avg_lifetime(vs6), _source->getSent().at(6), _qs.at(6)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v5), avg_lifetime(vq5), avg_lifetime(vs5), _source->getSent().at(5), _qs.at(5)->getDropped().size());
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v5), avg_lifetime(vq5), avg_lifetime(vs5), _source->getSent().at(5), _qs.at(5)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v4), avg_lifetime(vq4), avg_lifetime(vs4), _source->getSent().at(4), _qs.at(4)->getDropped().size());
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v4), avg_lifetime(vq4), avg_lifetime(vs4), _source->getSent().at(4), _qs.at(4)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v3), avg_lifetime(vq3), avg_lifetime(vs3), _source->getSent().at(3), _qs.at(3)->getDropped().size());
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v3), avg_lifetime(vq3), avg_lifetime(vs3), _source->getSent().at(3), _qs.at(3)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
 	}
-	sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
+	sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
 	str = string(buf);
 	Useful::getInstance()->appendToFile(filename, str);
-	sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v1), avg_lifetime(vq1), avg_lifetime(vs1), _source->getSent().at(1), _qs.at(1)->getDropped().size());
+	sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v1), avg_lifetime(vq1), avg_lifetime(vs1), _source->getSent().at(1), _qs.at(1)->getDropped().size());
 	str = string(buf);
 	Useful::getInstance()->appendToFile(filename, str);
-	sprintf(buf, "%2.0lf,%2.0lf,%2.0lf,%d,%d", avg_lifetime(v0), avg_lifetime(vq0), avg_lifetime(vs0), _source->getSent().at(0), _qs.at(0)->getDropped().size());
+	sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v0), avg_lifetime(vq0), avg_lifetime(vs0), _source->getSent().at(0), _qs.at(0)->getDropped().size());
 	str = string(buf);
 	Useful::getInstance()->appendToFile(filename, str);
 

@@ -49,6 +49,21 @@ void Source::initialize() {
 	_interArrivalTime = par("interArrivalTime");
 	_ifg = par("ifg");
 	
+	_serviceTime = par("serviceTime");
+
+	_burstTest = par("burstTest");
+	if( _burstTest ) {
+		_burstCounter=0;
+		_nofBurstCounter=0;
+		Useful::getInstance()->setBurstIntervals();
+		_saveBurstData=false;
+		saveBurstDataMsg = new cMessage("saveBurstData");
+	} else {
+		_burstCounter=-1;
+		_nofBurstCounter=-1;
+		_saveBurstData=false;
+	}
+
 	// schedule the first message timer for start time
 	startSendingPacket = new cMessage("startSendingPacket");
 	scheduleAt(startTime, startSendingPacket);
@@ -84,22 +99,63 @@ void Source::handleMessage(cMessage *msg) {
 
 	// synchronous sending of packets
     if( (numCreated < numPackets) ) {
-    	// asynchronous arrival of new packets
-        // reschedule the timer for the next message
-		// consider interArrivalTime and ifg
 
-		if (_data.size() > 0) {
-        	vector<PacketDescription>::iterator it;
-			it = _data.begin();
-			if (it != _data.end()) {
-				int prio = (*it).getPriority();
-				WRPacket *p = generatePacket(prio, (*it).getSize());
-				numCreated++;
+    	if( _burstTest == false ) {
+    		// generate next packet when transmission is finished
+    		if( msg == startSendingPacket ) {
+				if (_data.size() > 0) {
+					vector<PacketDescription>::iterator it;
+					it = _data.begin();
+					if (it != _data.end()) {
+						int prio = (*it).getPriority();
+						WRPacket *p = generatePacket(prio, (*it).getSize());
+						numCreated++;
 
-				sendPacket(p);
-				_data.erase(it);
-			}
-        }
+						sendPacket(p);
+						_data.erase(it);
+					}
+				}
+    		}
+    	} else {
+    		// investigate satiation behavior
+    		// TODO sent 10,20,40,80,160,320,640,... packets, after each interval collect data
+    		// generate next packet when transmission is finished
+    		if( msg == startSendingPacket ) {
+				if (_data.size() > 0) {
+					vector<PacketDescription>::iterator it;
+					it = _data.begin();
+
+					int prio = (*it).getPriority();	// always remember the last
+					WRPacket *p = generatePacket(prio, (*it).getSize());
+
+					if (it != _data.end() && _nofBurstCounter!=Useful::getInstance()->getBurstIntervals().at(_burstCounter) ) {
+						//cout << "simTime() " << simTime() << endl;
+						sendPacket(p);
+						_data.erase(it);
+						numCreated++;
+						_nofBurstCounter++;
+						if(_saveBurstData==true) _saveBurstData=false;
+					}
+					if( _nofBurstCounter==Useful::getInstance()->getBurstIntervals().at(_burstCounter) ){
+						// wie sicher stellen dass source und sink zum selben event dran kommen???
+						//cout << "lala " << endl;
+						// schedule next burst interval
+						/*cancelEvent(startSendingPacket);
+
+						cGate* outputgate = getGate(prio);
+						cDatarateChannel* channel = check_and_cast<cDatarateChannel *> (outputgate->getTransmissionChannel());
+						simtime_t t = channel->calculateDuration(p);
+
+						scheduleAt((simTime()+t), startSendingPacket);	// TODO waiting time? // This affects the results!!!
+						*/
+						send(saveBurstDataMsg, "saveBurstData");
+						_burstCounter++;
+						_nofBurstCounter=0;
+						_saveBurstData=true;
+					}
+				}
+    		}
+    	}
     } else {
         // finished
         delete msg;
@@ -107,6 +163,11 @@ void Source::handleMessage(cMessage *msg) {
 } // handleMessage()
 
 void Source::sendPacket(WRPacket* packet) {
+
+	// asynchronous arrival of new packets if packet sizes vary, else synchronous
+	// reschedule the timer for the next message
+	// consider interArrivalTime and ifg
+
 	int prio = packet->getPriority();
 	cGate* outputgate = getGate(prio);
 	cDatarateChannel* channel = check_and_cast<cDatarateChannel *> (outputgate->getTransmissionChannel());
@@ -118,7 +179,10 @@ void Source::sendPacket(WRPacket* packet) {
 		_sent.at(prio) = _sent.at(prio)+1;
 		// trigger new packet generation
 		// immediately send the next packet (full load)
+		// cancel and re-schedule
+		cancelEvent(startSendingPacket);
 		scheduleAt((simTime()+t+_ifg), startSendingPacket);
+		//cout << "simTime() " << simTime() << " next " << simTime()+t+_ifg << endl;
 
 		// allow some time between two new packets (lower load)
 		//scheduleAt((simTime()+t+_ifg+_interArrivalTime), startSendingPacket);

@@ -47,6 +47,8 @@ class QUEUEING_API Sink : public cSimpleModule
     bool keepJobs;
 
     int _nofCoS;
+    bool _burstTest;
+    cMessage *saveBurstData;
 
     int numReceived;
 

@@ -26,10 +26,13 @@ simple Source
         volatile double interArrivalTime @unit(s); // time between generated jobs
 		volatile double ifg @unit(s); 				// time for interframe gap
         double startTime @unit(s) = default(0); // when the module sends out the first packet
-    
+    	volatile double serviceTime @unit(s); // WRS cycle
+    	
     	string inputDataFile = default("");
-    	int nofCoS = default(8);	// default: 7..0 
+    	int nofCoS = default(8);	// default: 7..0
+    	bool burstTest = default(false); 
     gates:
         output pppg[] @labels(PPPFrame-conn);
+        output saveBurstData;
 }
 

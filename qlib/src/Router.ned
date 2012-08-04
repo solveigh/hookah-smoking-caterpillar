@@ -24,7 +24,7 @@ simple Router
         volatile int randomGateIndex = default(intuniform(0, sizeof(out)-1));    // the destination gate in case of random routing
         
         double startTime @unit(s) = default(0); // when the module sends out the first packet
-        volatile double serviceTime @unit(s); // service time of a job
+        volatile double serviceTime @unit(s); // WRS cycle
         volatile double ifg @unit(s); 				// time for interframe gap
     	int nofCoS = default(8);	// default: 7..0
     	

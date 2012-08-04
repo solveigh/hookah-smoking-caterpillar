@@ -81,8 +81,13 @@ public:
     // helper function to create input data
     void createInputData(int number);
 
+    vector<int> getBurstIntervals(){ return _vecBurstIntervals; };
+    void setBurstIntervals();
+
 private:
 	static Useful *_instance;
+
+	vector<int> _vecBurstIntervals;
 
 };
 

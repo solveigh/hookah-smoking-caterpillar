@@ -92,4 +92,5 @@ network WRS_N8
         queue7.out --> router.in++;
 
         router.pppg --> pppline --> GbpsSink.in;
+        source.saveBurstData --> GbpsSink.saveBurstData;
 }

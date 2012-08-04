@@ -34,7 +34,9 @@ simple Sink
         bool keepJobs = default(false); // whether to keep the received jobs till the end of simulation
         
         int nofCoS = default(8);	// default: 7..0
+        bool burstTest = default(false);
     gates:
         input in;
+        input saveBurstData;
 }
 

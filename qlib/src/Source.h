@@ -62,12 +62,21 @@ class QUEUEING_API Source : public SourceBase
 
         cMessage *receivePacket;
         cMessage *startSendingPacket;
+        cMessage *saveBurstDataMsg;
 		
 		// Time between packets
 		simtime_t _interArrivalTime;
 		
 		// Time for the Interframe Gap
 		simtime_t _ifg;
+
+		// WRS cycle
+		simtime_t _serviceTime;
+
+		bool _burstTest;
+		int _burstCounter;	// indicate the current burst interval
+		int _nofBurstCounter;	// indicate how many from a burst interval were sent
+		bool _saveBurstData;	// true after each burst
 
     protected:
         virtual void initialize();
@@ -81,6 +90,9 @@ class QUEUEING_API Source : public SourceBase
     	int getNumPackets() { return numPackets; };
     	std::vector<int> getSent() { return _sent; };
     	string getInputDataFileName() { return _inputDataFile; };
+    	int getBurstCounter() {return _burstCounter; };
+    	int getNofBurstCounter() {return _nofBurstCounter; };
+    	bool saveBurstData() { return _saveBurstData; };
 };
 
 
