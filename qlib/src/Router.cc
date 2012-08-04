@@ -149,7 +149,8 @@ void Router::initialize() {
 		wfq_counter[i] = 0;
 	}
 
-	_ifg = 12;
+	_ifg = par("ifg");
+	_ifgBytes = 12; //_ifg * 1250*10^9; 1250000000000
 } // initialize()
 
 void Router::handleMessage(cMessage *msg) {
@@ -188,7 +189,7 @@ void Router::handleMessage(cMessage *msg) {
 				//cout << "rrCounter: " << rrCounter << " psize " << packet_size << " creditcnt " << credit_counter[rrCounter] << " " << queue_credit[rrCounter] << endl;
 				if ((_packet_size + _ifg) <= credit_counter[rrCounter]) {
 					queueIndex = rrCounter;
-					credit_counter[rrCounter] -= _packet_size + _ifg;
+					credit_counter[rrCounter] -= _packet_size + _ifgBytes;
 					//cout << " creditcnt " << credit_counter[rrCounter] << " " << queue_credit[rrCounter] << endl;
 					if (credit_counter[rrCounter] == 0) {
 						rrCounter = (rrCounter + 1) % _nofCoS;
@@ -575,7 +576,7 @@ void Router::handleMessage(cMessage *msg) {
 		// Notify ourselves the moment the transmission line finishes transmitting the packet to choose (schedule) the next one.
 		simtime_t ft =
 				gate("pppg")->getTransmissionChannel()->getTransmissionFinishTime();
-		scheduleAt(ft, triggerServiceMsg);
+		scheduleAt(ft+_ifg, triggerServiceMsg);
 	}
 } // handleMessage()
 
@@ -587,10 +588,10 @@ int Router::determineQIndex(map<int, int>::iterator mit, int priority) {
 	if (credit_counter[priority] == 0)
 		credit_counter[priority] = queue_credit[priority];
 	_packet_size = getQueue(priority)->front()->getByteLength();
-	credit_counter[priority] -= _packet_size + _ifg;
+	credit_counter[priority] -= _packet_size + _ifgBytes;
 	if ((_packet_size + _ifg) <= credit_counter[priority]) {
 		queueIndex = priority;
-		credit_counter[priority] -= _packet_size + _ifg;
+		credit_counter[priority] -= _packet_size + _ifgBytes;
 	} else {
 		// give more credit
 		credit_counter[priority] += queue_credit[priority];

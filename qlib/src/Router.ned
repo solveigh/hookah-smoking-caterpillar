@@ -25,6 +25,7 @@ simple Router
         
         double startTime @unit(s) = default(0); // when the module sends out the first packet
         volatile double serviceTime @unit(s); // service time of a job
+        volatile double ifg @unit(s); 				// time for interframe gap
     	int nofCoS = default(8);	// default: 7..0
     	
     	// N=8

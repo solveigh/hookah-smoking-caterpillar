@@ -74,6 +74,9 @@ class QUEUEING_API Router : public cSimpleModule
 
         map<int, int> _mapQSizes;	// length, queue index
 
+		// Time for the Interframe Gap
+		simtime_t _ifg;
+
         // wfq
 		int wfq_weight[8];	// only 0..3 are used for _nofCoS=3
 		int wfq_counter[8];	// only 0..3 are used for _nofCoS=3
@@ -117,7 +120,7 @@ class QUEUEING_API Router : public cSimpleModule
     	int credit_counter[8];	// only 0..3 are used for _nofCoS=3
     	int weight[8];	// only 0..3 are used for _nofCoS=3
     	int _packet_size;	// size of the payload of a packet
-    	int _ifg;	// Interframe Gap
+    	int _ifgBytes;	// Interframe Gap
 
         int determinOperationCount(int routingAlgorithm);
 
