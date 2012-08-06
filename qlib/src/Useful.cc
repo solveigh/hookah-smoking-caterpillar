@@ -30,7 +30,7 @@ Useful *Useful::getInstance() {
 void Useful::setBurstIntervals() {
 	// define intervals manually
 	for( int i=0; i<501; i++ ) {
-		_vecBurstIntervals.push_back(50);
+		_vecBurstIntervals.push_back(10);
 	}
 
 }

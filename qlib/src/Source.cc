@@ -137,21 +137,25 @@ void Source::handleMessage(cMessage *msg) {
 						if(_saveBurstData==true) _saveBurstData=false;
 					}
 					if( _nofBurstCounter==Useful::getInstance()->getBurstIntervals().at(_burstCounter) ){
-						// wie sicher stellen dass source und sink zum selben event dran kommen???
+						// wie sicher stellen dass source und sink beim selben event dran kommen???
 						//cout << "lala " << endl;
 						// schedule next burst interval
-						/*cancelEvent(startSendingPacket);
+						//send(saveBurstDataMsg, "saveBurstData");
 
 						cGate* outputgate = getGate(prio);
 						cDatarateChannel* channel = check_and_cast<cDatarateChannel *> (outputgate->getTransmissionChannel());
 						simtime_t t = channel->calculateDuration(p);
 
-						scheduleAt((simTime()+t), startSendingPacket);	// TODO waiting time? // This affects the results!!!
-						*/
-						send(saveBurstDataMsg, "saveBurstData");
+						cancelEvent(saveBurstDataMsg);
+						scheduleAt(simTime()+t, saveBurstDataMsg);
+
 						_burstCounter++;
 						_nofBurstCounter=0;
 						_saveBurstData=true;
+
+						// reschedule rest of events
+						cancelEvent(startSendingPacket);
+						scheduleAt((simTime()+t), startSendingPacket);	// TODO waiting time? // This affects the results!!!
 					}
 				}
     		}

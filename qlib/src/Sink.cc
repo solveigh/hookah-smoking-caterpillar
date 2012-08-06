@@ -135,7 +135,7 @@ void Sink::handleMessage(cMessage *msg) {
 
 			int burstCounter = _source->getBurstCounter();
 			int nofBursts = Useful::getInstance()->getBurstIntervals().at(burstCounter);
-			//cout << "burst interval of " << nofBursts << " now at " << nofBurstCounter << endl;
+			cout << "burst interval of " << nofBursts << " now at " << burstCounter << endl;
 
 			int nofCreated = _source->getCreated();
 			int nofArrived=-1;
@@ -144,7 +144,11 @@ void Sink::handleMessage(cMessage *msg) {
 			if( _nofCoS==3 )
 				nofArrived = v0.size()+v1.size()+v2.size();
 
-			if( _source->saveBurstData()==true && nofCreated==nofArrived) {
+			cout << "nofCreated " << nofCreated << " nofArrived " << nofArrived << endl;
+
+			determineQueueSizes();
+
+			if( _source->saveBurstData()==true ) {
 				cout << "burst ctr " << burstCounter << " # bursts " << nofBursts << endl;
 				char buf[30];
 				sprintf(buf, "burst_%d_%d_", nofBursts, nofCreated);
@@ -805,7 +809,7 @@ void Sink::determineQueueSizes() {
 	char buffer[3];
 
 	for (int i = 0; i < _nofCoS; i++) {
-		queue = "passiveQueue";
+		queue = "queue";
 		sprintf(buffer, "%d", i);
 		buffer[2] = '\0';
 		queue += buffer;
