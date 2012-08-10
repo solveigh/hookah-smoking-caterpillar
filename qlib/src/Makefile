@@ -32,9 +32,9 @@ OBJS = \
     $O/Useful.o \
     $O/Source.o \
     $O/WRPacket.o \
-    $O/PassiveQueue.o \
     $O/PacketList.o \
-    $O/Router.o \
+    $O/Scheduler.o \
+    $O/Queue.o \
     $O/Sink.o \
     $O/Packet_m.o
 
@@ -128,25 +128,25 @@ $O/PacketList.o: PacketList.cc \
 $O/Packet_m.o: Packet_m.cc \
 	Packet_m.h \
 	QueueingDefs.h
-$O/PassiveQueue.o: PassiveQueue.cc \
+$O/Queue.o: Queue.cc \
 	IPassiveQueue.h \
 	Packet_m.h \
-	PassiveQueue.h \
+	Queue.h \
 	QueueingDefs.h \
-	Router.h \
+	Scheduler.h \
 	WRPacket.h
-$O/Router.o: Router.cc \
+$O/Scheduler.o: Scheduler.cc \
 	IPassiveQueue.h \
 	Packet_m.h \
 	QueueingDefs.h \
-	Router.h \
+	Scheduler.h \
 	WRPacket.h
 $O/Sink.o: Sink.cc \
 	IPassiveQueue.h \
 	Packet_m.h \
-	PassiveQueue.h \
+	Queue.h \
 	QueueingDefs.h \
-	Router.h \
+	Scheduler.h \
 	Sink.h \
 	Source.h \
 	Useful.h \
@@ -154,9 +154,9 @@ $O/Sink.o: Sink.cc \
 $O/Source.o: Source.cc \
 	IPassiveQueue.h \
 	Packet_m.h \
-	PassiveQueue.h \
+	Queue.h \
 	QueueingDefs.h \
-	Router.h \
+	Scheduler.h \
 	Sink.h \
 	Source.h \
 	Useful.h \

@@ -48,7 +48,7 @@ void Sink::initialize() {
 	WATCH(numReceived);
 
 	_source = dynamic_cast<Source *>((cModule*)getParentModule()->findObject("source", true));
-	_router = dynamic_cast<Router *>((cModule*)getParentModule()->findObject("router", true));
+	_scheduler = dynamic_cast<Scheduler *>((cModule*)getParentModule()->findObject("scheduler", true));
 
     // pointers to other queues
     //for( int i=_nofCoS; i>-2; i-- )
@@ -56,7 +56,7 @@ void Sink::initialize() {
     	_qs.push_back( getQueue(i) );
 }
 
-PassiveQueue *Sink::getQueue(int index) {
+Queue *Sink::getQueue(int index) {
 	std::string queue = "queue";
 	char buffer[3];
 
@@ -64,7 +64,7 @@ PassiveQueue *Sink::getQueue(int index) {
 	buffer[2]='\0';
 	queue += buffer;
 	cModule *module = getParentModule()->getSubmodule(queue.c_str());
-	PassiveQueue *pqueue = dynamic_cast<PassiveQueue *>(module);
+	Queue *pqueue = dynamic_cast<Queue *>(module);
 
 	return pqueue;
 } // getQueue()
@@ -185,12 +185,12 @@ void Sink::handleMessage(cMessage *msg) {
 				writeQueuingTimes2File4Plot(fname);
 
 				fname = begin + string("times_");
-				fname+=_router->getSchedulingAlgorithm();
+				fname+=_scheduler->getSchedulingAlgorithm();
 				fname+=string(".csv");
 				writeQueuingSchedulingTimes2File4Table(fname);
 
 				fname = begin + string("dropped_perc_");
-				fname+=_router->getSchedulingAlgorithm();
+				fname+=_scheduler->getSchedulingAlgorithm();
 				fname+=string(".csv");
 				writeDropped2FilePercentage4Table(fname);
 			}
@@ -233,7 +233,7 @@ void Sink::finish() {
 	//cout << __FILE__ << " received: " <<  numReceived << endl;
 
 	// overview
-	cout << this->getName() << ": CoS: " << _qs.size() << " " << _router->getSchedulingAlgorithm() << " Scenario: " << _source->getInputDataFileName() << endl;
+	cout << this->getName() << ": CoS: " << _qs.size() << " " << _scheduler->getSchedulingAlgorithm() << " Scenario: " << _source->getInputDataFileName() << endl;
 
 	if(_nofCoS==8) {
 		std::cout << "p 0: avg " << avg_lifetime(v0) << " ns size " << v0.size() << " Q time: " << avg_lifetime(vq0) << " ns "<</*S time: " << avg_lifetime(vsch0) << " ns*/ " sent: " << _source->getSent().at(0) << " dropped " << _qs.at(0)->getDropped().size() << "( " << (double(_qs.at(0)->getDropped().size())/double(_source->getSent().at(0)))*100.0 << "%)" << std::endl;
@@ -292,12 +292,12 @@ void Sink::finish() {
 	writeQueuingTimes2File4Plot(fname);
 
 	fname = string("times_");
-	fname+=_router->getSchedulingAlgorithm();
+	fname+=_scheduler->getSchedulingAlgorithm();
 	fname+=string(".csv");
 	writeQueuingSchedulingTimes2File4Table(fname);
 
 	fname = string("dropped_perc_");
-	fname+=_router->getSchedulingAlgorithm();
+	fname+=_scheduler->getSchedulingAlgorithm();
 	fname+=string(".csv");
 	writeDropped2FilePercentage4Table(fname);
 
@@ -307,7 +307,7 @@ void Sink::finish() {
 	this->setPerformFinalGC(true);
 
 #ifdef __linux__
-	if( strcmp(_router->getSchedulingAlgorithm().c_str(),"fcfs")==0 )
+	if( strcmp(_scheduler->getSchedulingAlgorithm().c_str(),"fcfs")==0 )
 		file_delete("fcfsdata");
 #endif
 } // finish()
@@ -320,7 +320,7 @@ void Sink::writeTimes2File(string filename) {
 		sprintf(buf,"Priority,7 (%d), 6 (%d),5 (%d),4 (%d),3 (%d),2 (%d),1 (%d),0 (%d)", _source->getSent().at(7), _source->getSent().at(6), _source->getSent().at(5), _source->getSent().at(4), _source->getSent().at(3), _source->getSent().at(2), _source->getSent().at(1),_source->getSent().at(0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(),avg_lifetime(vq7), avg_lifetime(vq6), avg_lifetime(vq5), avg_lifetime(vq4),
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _scheduler->getSchedulingAlgorithm().c_str(),avg_lifetime(vq7), avg_lifetime(vq6), avg_lifetime(vq5), avg_lifetime(vq4),
 		avg_lifetime(vq3), avg_lifetime(vq2), avg_lifetime(vq1), avg_lifetime(vq0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
@@ -328,7 +328,7 @@ void Sink::writeTimes2File(string filename) {
 		sprintf(buf,"Priority,2 (%d),1 (%d),0 (%d)", _source->getSent().at(2), _source->getSent().at(1),_source->getSent().at(0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(), avg_lifetime(vq2), avg_lifetime(vq1), avg_lifetime(vq0));
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf", _scheduler->getSchedulingAlgorithm().c_str(), avg_lifetime(vq2), avg_lifetime(vq1), avg_lifetime(vq0));
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
     }
@@ -352,7 +352,7 @@ void Sink::writeQueuingSchedulingTimes2File(string filename) {
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
     	}
-		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _scheduler->getSchedulingAlgorithm().c_str(),
 				avg_lifetime(vq7),avg_lifetime(vsch7),
 				avg_lifetime(vq6),avg_lifetime(vsch6),
 				avg_lifetime(vq5),avg_lifetime(vsch5),
@@ -372,7 +372,7 @@ void Sink::writeQueuingSchedulingTimes2File(string filename) {
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
     	}
-		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf,%2.0lf", _scheduler->getSchedulingAlgorithm().c_str(),
 				avg_lifetime(vq2),avg_lifetime(vsch2),
 				avg_lifetime(vq1),avg_lifetime(vsch1),
 				avg_lifetime(vq0),avg_lifetime(vsch0));
@@ -433,7 +433,7 @@ void Sink::writeQueuingSchedulingTimes2File4Table(string filename) {
 
 void Sink::writeQueuingTimes2File4Plot(string filename) {
 	string fname = string("plot_queuing_");
-	fname+=_router->getSchedulingAlgorithm();
+	fname+=_scheduler->getSchedulingAlgorithm();
 	fname+="_";
 	fname += filename;
 	string str;
@@ -468,7 +468,7 @@ void Sink::writeQueuingTimes2File4Plot(string filename) {
 
 void Sink::writeTimes2File4Plot(string filename) {
 	string fname = string("plot_");
-	fname+=_router->getSchedulingAlgorithm();
+	fname+=_scheduler->getSchedulingAlgorithm();
 	fname+="_";
 	fname += filename;
 	string str;
@@ -514,13 +514,13 @@ void Sink::writeDropped2File(string filename) {
 		}
 #endif
 #if 1
-		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", _router->getSchedulingAlgorithm().c_str(), _source->getSent().at(7), _qs.at(7)->getDropped().size(),
+		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(), _source->getSent().at(7), _qs.at(7)->getDropped().size(),
 				_source->getSent().at(6), _qs.at(6)->getDropped().size(), _source->getSent().at(5), _qs.at(5)->getDropped().size(),
 				_source->getSent().at(4), _qs.at(4)->getDropped().size(), _source->getSent().at(3), _qs.at(3)->getDropped().size(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(), _source->getSent().at(1), _qs.at(1)->getDropped().size(),
 				_source->getSent().at(0), _qs.at(0)->getDropped().size());
 #else
-		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d,%d,%d", _router->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(),
+		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(),
 			_qs.at(6)->getDropped().size(), _qs.at(5)->getDropped().size(), _qs.at(4)->getDropped().size(), _qs.at(3)->getDropped().size(),
 			_qs.at(2)->getDropped().size(), _qs.at(1)->getDropped().size(), _qs.at(0)->getDropped().size());
 #endif
@@ -533,12 +533,12 @@ void Sink::writeDropped2File(string filename) {
 		}
 #endif
 #if 1
-		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(),
 				_source->getSent().at(1), _qs.at(1)->getDropped().size(),
 				_source->getSent().at(0), _qs.at(0)->getDropped().size());
 #else
-		sprintf(buf,"%s,%d,%d,%d", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(),
 			_qs.at(2)->getDropped().size(), _qs.at(1)->getDropped().size(), _qs.at(0)->getDropped().size());
 #endif
 	}
@@ -548,7 +548,7 @@ void Sink::writeDropped2File(string filename) {
 
 void Sink::writeDropped2File4Plot(string filename) {
 	string fname = string("plot_");
-	fname+=_router->getSchedulingAlgorithm();
+	fname+=_scheduler->getSchedulingAlgorithm();
 	fname+="_";
 	fname += filename;
 	string str;
@@ -583,7 +583,7 @@ void Sink::writeDropped2File4Plot(string filename) {
 
 void Sink::writeDropped2File4PlotPercentage(string filename) {
 	string fname = string("plot_perc_");
-	fname+=_router->getSchedulingAlgorithm();
+	fname+=_scheduler->getSchedulingAlgorithm();
 	fname+="_";
 	fname += filename;
 	string str;
@@ -637,7 +637,7 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf", _router->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(), d7,
+		sprintf(buf,"%s,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf", _scheduler->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(), d7,
 				_qs.at(6)->getDropped().size(), d6, _qs.at(5)->getDropped().size(), d5, _qs.at(4)->getDropped().size(), d4, _qs.at(3)->getDropped().size(), d3,
 				_qs.at(2)->getDropped().size(), d2, _qs.at(1)->getDropped().size(), d1, _qs.at(0)->getDropped().size(), d0);
 		str = string(buf);
@@ -653,7 +653,7 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf", _router->getSchedulingAlgorithm().c_str(),
+		sprintf(buf,"%s,%d,%2.1lf,%d,%2.1lf,%d,%2.1lf", _scheduler->getSchedulingAlgorithm().c_str(),
 				_qs.at(2)->getDropped().size(), d2, _qs.at(1)->getDropped().size(), d1, _qs.at(0)->getDropped().size(), d0);
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
@@ -730,7 +730,7 @@ void Sink::write2File(string filename) {
 
 	// create comma separated text file for easy evaluation
 	Useful::getInstance()->appendToFile(filename, this->getName() );
-	Useful::getInstance()->appendToFile(filename, _router->getSchedulingAlgorithm());
+	Useful::getInstance()->appendToFile(filename, _scheduler->getSchedulingAlgorithm());
 	Useful::getInstance()->appendToFile(filename, _source->getInputDataFileName());
 
 	if( _nofCoS==8 ) {

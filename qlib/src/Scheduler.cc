@@ -1,19 +1,11 @@
-//
-// This file is part of an OMNeT++/OMNEST simulation example.
-//
-// Copyright (C) 2006-2008 OpenSim Ltd.
-//
-// This file is distributed WITHOUT ANY WARRANTY. See the file
-// `license' for details on this and other legal matters.
-//
 
-#include "Router.h"
+#include "Scheduler.h"
 
 namespace qlib {
 
-Define_Module(Router);
+Define_Module(Scheduler);
 
-void Router::initialize() {
+void Scheduler::initialize() {
 	const char *algName = par("routingAlgorithm");
 	if (strcmp(algName, "SQF") == 0) {
 		routingAlgorithm = ALG_SQF;
@@ -153,7 +145,7 @@ void Router::initialize() {
 	_ifgBytes = 12; //_ifg * 1250*10^9; 1250000000000
 } // initialize()
 
-void Router::handleMessage(cMessage *msg) {
+void Scheduler::handleMessage(cMessage *msg) {
 	vector<IPassiveQueue*>::iterator it;
 	vector<IPassiveQueue*> p30;
 	map<int, int>::iterator mit;
@@ -580,7 +572,7 @@ void Router::handleMessage(cMessage *msg) {
 	}
 } // handleMessage()
 
-int Router::determineQIndex(map<int, int>::iterator mit, int priority) {
+int Scheduler::determineQIndex(map<int, int>::iterator mit, int priority) {
 	int queueIndex = -1;
 	weight[priority] = (mit->first + 1) * (mit->second); // ensure that priority 0 will be considered as well
 	queue_credit[priority] = (1000 * weight[priority]);
@@ -599,7 +591,7 @@ int Router::determineQIndex(map<int, int>::iterator mit, int priority) {
 	return queueIndex;
 } // determineQIndex()
 
-int Router::determinOperationCount(int routingAlgorithm) {
+int Scheduler::determinOperationCount(int routingAlgorithm) {
 	int op = -1;
 
 	switch (routingAlgorithm) {
@@ -628,7 +620,7 @@ int Router::determinOperationCount(int routingAlgorithm) {
 	return op;
 } // determinOperationCount()
 
-IPassiveQueue *Router::getQueue(int index) {
+IPassiveQueue *Scheduler::getQueue(int index) {
 	std::string queue = "queue";
 	char buffer[3];
 
@@ -641,7 +633,7 @@ IPassiveQueue *Router::getQueue(int index) {
 	return pqueue;
 } // getQueue()
 
-string Router::getQueueName(int index) {
+string Scheduler::getQueueName(int index) {
 	std::string queue = "queue";
 	char buffer[3];
 
@@ -652,7 +644,7 @@ string Router::getQueueName(int index) {
 	return queue;
 } // getQueueName()
 
-void Router::determineQueueSizes() {
+void Scheduler::determineQueueSizes() {
 
 	for (int i = 0; i < (_nofCoS + 1); i++) {
 		IPassiveQueue *pqueue = getQueue(i);
@@ -662,7 +654,7 @@ void Router::determineQueueSizes() {
 	}
 } // determineQueueSizes()
 
-int Router::calculateMaxWeight(int weight[], int asize) {
+int Scheduler::calculateMaxWeight(int weight[], int asize) {
 	int maxval = 0, i = 0;
 
 	for (i = 0; i < asize; i++) {
@@ -675,7 +667,7 @@ int Router::calculateMaxWeight(int weight[], int asize) {
 	return maxval;
 } // calculateMaxWeight()
 
-int Router::calculateHighestCommonDivisor(int weight[], int asize) {
+int Scheduler::calculateHighestCommonDivisor(int weight[], int asize) {
 	int i, a, t, b;
 	a = weight[0];
 
@@ -695,7 +687,7 @@ int Router::calculateHighestCommonDivisor(int weight[], int asize) {
 	return a;
 } // calculateHighestCommonDivisor()
 
-int Router::sumWeights(int weight[], int size) {
+int Scheduler::sumWeights(int weight[], int size) {
 	int sum = 0;
 	for (int i = 0; i < size; i++)
 		sum += weight[i];

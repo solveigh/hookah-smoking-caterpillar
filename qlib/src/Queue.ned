@@ -16,7 +16,7 @@ package qlib;
 // @author rhornig
 // @todo minDelay not implemented
 //
-simple PassiveQueue
+simple Queue
 {
     parameters:
         @group(Queueing);

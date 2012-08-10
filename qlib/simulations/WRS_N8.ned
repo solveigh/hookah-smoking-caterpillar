@@ -15,10 +15,10 @@
 
 package qlib.simulations;
 
-import qlib.Router;
+import qlib.Scheduler;
 import qlib.Source;
 import qlib.Sink;
-import qlib.PassiveQueue;
+import qlib.Queue;
 
 import ned.DatarateChannel;
 
@@ -41,35 +41,35 @@ network WRS_N8
         source: Source {
             @display("p=37,277");
         }
-        queue0: PassiveQueue {
+        queue0: Queue {
             @display("p=186,44");
         }
-        queue1: PassiveQueue {
+        queue1: Queue {
             @display("p=186,114");
         }
-        queue2: PassiveQueue {
+        queue2: Queue {
             @display("p=186,179");
         }
-        queue3: PassiveQueue {
+        queue3: Queue {
             @display("p=186,245");
         }
-        queue4: PassiveQueue {
+        queue4: Queue {
             @display("p=186,316");
         }
-        queue5: PassiveQueue {
+        queue5: Queue {
             @display("p=186,378");
         }
-        queue6: PassiveQueue {
+        queue6: Queue {
             @display("p=186,447");
         }
-        queue7: PassiveQueue {
+        queue7: Queue {
             @display("p=186,519");
         }
 
         GbpsSink: Sink {
             @display("p=423,277");
         }
-        router: Router {
+        scheduler: Scheduler {
             @display("p=328,277;b=35,39");
         }
     connections:
@@ -82,15 +82,15 @@ network WRS_N8
         source.pppg++ --> pppline --> queue6.in;
         source.pppg++ --> pppline --> queue7.in;
 
-        queue0.out --> router.in++;
-        queue1.out --> router.in++;
-        queue2.out --> router.in++;
-        queue3.out --> router.in++;
-        queue4.out --> router.in++;
-        queue5.out --> router.in++;
-        queue6.out --> router.in++;
-        queue7.out --> router.in++;
+        queue0.out --> scheduler.in++;
+        queue1.out --> scheduler.in++;
+        queue2.out --> scheduler.in++;
+        queue3.out --> scheduler.in++;
+        queue4.out --> scheduler.in++;
+        queue5.out --> scheduler.in++;
+        queue6.out --> scheduler.in++;
+        queue7.out --> scheduler.in++;
 
-        router.pppg --> pppline --> GbpsSink.in;
+        scheduler.pppg --> pppline --> GbpsSink.in;
         source.saveBurstData --> GbpsSink.saveBurstData;
 }

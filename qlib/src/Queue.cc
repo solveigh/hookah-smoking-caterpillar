@@ -7,22 +7,22 @@
 // `license' for details on this and other legal matters.
 //
 
-#include "PassiveQueue.h"
+#include "Queue.h"
 
 
 namespace qlib {
 
-Define_Module(PassiveQueue);
+Define_Module(Queue);
 
-PassiveQueue::PassiveQueue()
+Queue::Queue()
 {
 }
 
-PassiveQueue::~PassiveQueue()
+Queue::~Queue()
 {
 }
 
-void PassiveQueue::initialize()
+void Queue::initialize()
 {
     droppedSignal = registerSignal("dropped");
     queueingTimeSignal = registerSignal("queueingTime");
@@ -35,17 +35,17 @@ void PassiveQueue::initialize()
 
     fifo = par("fifo");
 
-	router = (cModule*)getParentModule()->findObject("router", true);
+	scheduler = (cModule*)getParentModule()->findObject("scheduler", true);
 
     std::cout << this->getName() << endl;
 } // initialize()
 
-void PassiveQueue::finish()
+void Queue::finish()
 {
     //std::cout << this->getName() <<  " " << queue.length() << endl;
 }
 
-void PassiveQueue::handleMessage(cMessage *msg)
+void Queue::handleMessage(cMessage *msg)
 {
 	//std::cout << " " << __FILE__ << ": "<< __FUNCTION__ << " " << msg->getName() << std::endl;
 	WRPacket *job = check_and_cast<WRPacket *>(msg);
@@ -58,7 +58,7 @@ void PassiveQueue::handleMessage(cMessage *msg)
         getDisplayString().setTagArg("i",1, queue.empty() ? "" : "cyan3");
 } // handleMessage()
 
-void PassiveQueue::enqueue(cPacket* msg) {
+void Queue::enqueue(cPacket* msg) {
 	WRPacket *job = check_and_cast<WRPacket *>(msg);
 	job->setTimestamp();
 
@@ -82,12 +82,12 @@ void PassiveQueue::enqueue(cPacket* msg) {
 	//std::cout << this->getName() << " Q size " << queue.length() << std::endl;
 } // enequeue()
 
-int PassiveQueue::length()
+int Queue::length()
 {
     return queue.length();
 } // length()
 
-int PassiveQueue::size()
+int Queue::size()
 {
 	int size = 0;
 	for( int i=0; i<length(); i++ ) {
@@ -96,7 +96,7 @@ int PassiveQueue::size()
     return size;
 } // size()
 
-void PassiveQueue::request(int gateIndex)
+void Queue::request(int gateIndex)
 {
     Enter_Method("request()!");
 
@@ -130,7 +130,7 @@ void PassiveQueue::request(int gateIndex)
         getDisplayString().setTagArg("i",1, queue.empty() ? "" : "cyan");
 } // request()
 
-WRPacket * PassiveQueue::front() {
+WRPacket * Queue::front() {
 	return (WRPacket *)queue.front();
 } // front()
 

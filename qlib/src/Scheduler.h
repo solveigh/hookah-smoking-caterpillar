@@ -1,14 +1,6 @@
-//
-// This file is part of an OMNeT++/OMNEST simulation example.
-//
-// Copyright (C) 2006-2008 OpenSim Ltd.
-//
-// This file is distributed WITHOUT ANY WARRANTY. See the file
-// `license' for details on this and other legal matters.
-//
 
-#ifndef __QUEUEING_ROUTER_H
-#define __QUEUEING_ROUTER_H
+#ifndef __QUEUEING_SCHEDULER_H
+#define __QUEUEING_SCHEDULER_H
 
 #include "QueueingDefs.h"
 #include "WRPacket.h"
@@ -48,7 +40,7 @@ enum alg {
 /**
  * Sends the messages to different outputs depending on a set algorithm.
  */
-class QUEUEING_API Router : public cSimpleModule
+class QUEUEING_API Scheduler : public cSimpleModule
 {
     private:
 	    string schedulingAlgorithm;

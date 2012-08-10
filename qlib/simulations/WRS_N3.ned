@@ -15,10 +15,10 @@
 
 package qlib.simulations;
 
-import qlib.Router;
+import qlib.Scheduler;
 import qlib.Source;
 import qlib.Sink;
-import qlib.PassiveQueue;
+import qlib.Queue;
 
 import ned.DatarateChannel;
 
@@ -41,20 +41,20 @@ network WRS_N3
         source: Source {
             @display("p=34,114");
         }
-        queue0: PassiveQueue {
+        queue0: Queue {
             @display("p=186,44");
         }
-        queue1: PassiveQueue {
+        queue1: Queue {
             @display("p=186,114");
         }
-        queue2: PassiveQueue {
+        queue2: Queue {
             @display("p=186,179");
         }
 
         GbpsSink: Sink {
             @display("p=421,114");
         }
-        router: Router {
+        scheduler: Scheduler {
             @display("p=322,114;b=35,39");
         }
     connections:
@@ -62,10 +62,10 @@ network WRS_N3
         source.pppg++ --> pppline --> queue1.in;
         source.pppg++ --> pppline --> queue2.in;
 
-        queue0.out --> router.in++;
-        queue1.out --> router.in++;
-        queue2.out --> router.in++;
+        queue0.out --> scheduler.in++;
+        queue1.out --> scheduler.in++;
+        queue2.out --> scheduler.in++;
 
-        router.pppg --> pppline --> GbpsSink.in;
+        scheduler.pppg --> pppline --> GbpsSink.in;
         source.saveBurstData --> GbpsSink.saveBurstData;
 }

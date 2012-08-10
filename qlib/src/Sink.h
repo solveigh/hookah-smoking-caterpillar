@@ -12,9 +12,9 @@
 
 #include "QueueingDefs.h"
 #include "IPassiveQueue.h"
-#include "PassiveQueue.h"
+#include "Queue.h"
 #include "Packet_m.h"
-#include "Router.h"
+#include "Scheduler.h"
 #include "Source.h"
 
 #include "Useful.h"
@@ -98,11 +98,11 @@ class QUEUEING_API Sink : public cSimpleModule
 	vector<simtime_t> vsch7;
 
 	// pointer to queues
-	std::vector<PassiveQueue*> _qs;
-	PassiveQueue *getQueue(int index);
+	std::vector<Queue*> _qs;
+	Queue *getQueue(int index);
 
 	Source *_source;
-	Router *_router;
+	Scheduler *_scheduler;
 
 	void write2File(string filename);
 	void writeDropped2File(string filename);

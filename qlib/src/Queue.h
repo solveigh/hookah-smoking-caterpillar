@@ -13,7 +13,7 @@
 #include "QueueingDefs.h"
 #include "IPassiveQueue.h"
 #include "Packet_m.h"
-#include "Router.h"
+#include "Scheduler.h"
 #include "WRPacket.h"
 
 #include <vector>
@@ -27,7 +27,7 @@ class WRPacket;
 /**
  * A passive queue, designed to co-operate with IServer using method calls.
  */
-class QUEUEING_API PassiveQueue : public cSimpleModule, public IPassiveQueue
+class QUEUEING_API Queue : public cSimpleModule, public IPassiveQueue
 {
     private:
 		simsignal_t droppedSignal;
@@ -45,7 +45,7 @@ class QUEUEING_API PassiveQueue : public cSimpleModule, public IPassiveQueue
 
         vector<WRPacket* > _dropped;
 
-        cModule * router;
+        cModule * scheduler;
 
     protected:
         virtual void initialize();
@@ -53,8 +53,8 @@ class QUEUEING_API PassiveQueue : public cSimpleModule, public IPassiveQueue
         virtual void finish();
 
     public:
-        PassiveQueue();
-        virtual ~PassiveQueue();
+        Queue();
+        virtual ~Queue();
         // The following methods are called from IServer:
         virtual int length();
         virtual int size();
