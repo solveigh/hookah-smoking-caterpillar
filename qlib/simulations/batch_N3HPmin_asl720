@@ -26,3 +26,9 @@ rm -rf *.csv *.tex
 mkdir N3HPmin
 mv *.csv N3HPmin
 mv *.tex N3HPmin
+mv replaceInResults.sh N3HPmin
+
+
+cd N3HPmin
+chmod +x replaceInResults.sh 
+./replaceInResults.sh

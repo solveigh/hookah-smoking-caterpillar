@@ -26,3 +26,9 @@ rm -rf *.csv *.tex
 mkdir N8HPmax
 mv *.csv N8HPmax
 mv *.tex N8HPmax
+mv replaceInResults.sh N8HPmax
+
+
+cd N8HPmax
+chmod +x replaceInResults.sh 
+./replaceInResults.sh
