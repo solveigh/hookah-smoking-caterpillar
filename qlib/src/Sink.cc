@@ -129,13 +129,14 @@ void Sink::handleMessage(cMessage *msg) {
 		default:
 			break;
 		}
+		cancelAndDelete(msg);
 	} else {
 		if( _burstTest==true ) {
 			// write resultfiles
 
 			int burstCounter = _source->getBurstCounter();
 			int nofBursts = Useful::getInstance()->getBurstIntervals().at(burstCounter);
-			cout << "burst interval of " << nofBursts << " now at " << burstCounter << endl;
+			cout << "simtime " << simTime() << "burst interval of " << nofBursts << " now at " << burstCounter << endl;
 
 			int nofCreated = _source->getCreated();
 			int nofArrived=-1;
@@ -193,8 +194,9 @@ void Sink::handleMessage(cMessage *msg) {
 				fname+=string(".csv");
 				writeDropped2FilePercentage4Table(fname);
 			}
+			//msg->removeFromOwnershipTree();
+			cancelAndDelete(msg);
 		} // if( _burstTest==true )
-		cancelAndDelete(msg);
 	}
 	canFinish();
 } // handleMessage()

@@ -146,8 +146,14 @@ void Source::handleMessage(cMessage *msg) {
 						cDatarateChannel* channel = check_and_cast<cDatarateChannel *> (outputgate->getTransmissionChannel());
 						simtime_t t = channel->calculateDuration(p);
 
+						cout << "source save burst " << simTime() << " at " << simTime()+t << endl;
+						//if( saveBurstDataMsg->)
 						cancelEvent(saveBurstDataMsg);
-						scheduleAt(simTime()+t, saveBurstDataMsg);
+						//saveBurstDataMsg->
+						send(saveBurstDataMsg, "saveBurstData");
+
+						//cancelEvent(saveBurstDataMsg);
+						//scheduleAt(simTime(), saveBurstDataMsg);
 
 						_burstCounter++;
 						_nofBurstCounter=0;
