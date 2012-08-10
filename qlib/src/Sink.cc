@@ -733,10 +733,10 @@ void Sink::write2File(string filename) {
 	Useful::getInstance()->appendToFile(filename, _router->getSchedulingAlgorithm());
 	Useful::getInstance()->appendToFile(filename, _source->getInputDataFileName());
 
-	sprintf(buf,"Lifetime,\tQ-Time,\tS-Time,\tSent,\tDropped", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
-	str = string(buf);
-	Useful::getInstance()->appendToFile(filename, str);
 	if( _nofCoS==8 ) {
+		sprintf(buf,"Lifetime,\tQ-Time,\tS-Time,\tSent,\tDropped", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
 		sprintf(buf,"%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v7), avg_lifetime(vq7), avg_lifetime(vs7), _source->getSent().at(7), _qs.at(7)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
@@ -752,17 +752,30 @@ void Sink::write2File(string filename) {
 		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v3), avg_lifetime(vq3), avg_lifetime(vs3), _source->getSent().at(3), _qs.at(3)->getDropped().size());
 		str = string(buf);
 		Useful::getInstance()->appendToFile(filename, str);
-	}
-	sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
-	str = string(buf);
-	Useful::getInstance()->appendToFile(filename, str);
-	sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v1), avg_lifetime(vq1), avg_lifetime(vs1), _source->getSent().at(1), _qs.at(1)->getDropped().size());
-	str = string(buf);
-	Useful::getInstance()->appendToFile(filename, str);
-	sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v0), avg_lifetime(vq0), avg_lifetime(vs0), _source->getSent().at(0), _qs.at(0)->getDropped().size());
-	str = string(buf);
-	Useful::getInstance()->appendToFile(filename, str);
 
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v1), avg_lifetime(vq1), avg_lifetime(vs1), _source->getSent().at(1), _qs.at(1)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v0), avg_lifetime(vq0), avg_lifetime(vs0), _source->getSent().at(0), _qs.at(0)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+	} else if (_nofCoS==3) {
+		sprintf(buf,"Lifetime,\tQ-Time,\tS-Time,\tSent,\tDropped", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v2), avg_lifetime(vq2), avg_lifetime(vs2), _source->getSent().at(2), _qs.at(2)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v1), avg_lifetime(vq1), avg_lifetime(vs1), _source->getSent().at(1), _qs.at(1)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+		sprintf(buf, "%2.0lf,\t%2.0lf,\t%2.0lf,\t%d,\t%d", avg_lifetime(v0), avg_lifetime(vq0), avg_lifetime(vs0), _source->getSent().at(0), _qs.at(0)->getDropped().size());
+		str = string(buf);
+		Useful::getInstance()->appendToFile(filename, str);
+	}
 	int nofCreated = _source->getCreated();
 	int nofArrived=-1;
 	if( _nofCoS==8 )
