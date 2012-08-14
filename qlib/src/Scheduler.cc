@@ -13,9 +13,12 @@ void Scheduler::initialize() {
 	} else if (strcmp(algName, "LQF") == 0) {
 		routingAlgorithm = ALG_LQF;
 		schedulingAlgorithm = "LQF";
-	} else if (strcmp(algName, "WFQ") == 0) {
-		routingAlgorithm = ALG_WFQ;
-		schedulingAlgorithm = "WFQ";
+	} else if (strcmp(algName, "WFQ_RR") == 0) {
+		routingAlgorithm = ALG_WFQ_RR;
+		schedulingAlgorithm = "WFQ_RR";
+	} else if (strcmp(algName, "WFQ_HP") == 0) {
+		routingAlgorithm = ALG_WFQ_HP;
+		schedulingAlgorithm = "WFQ_HP";
 	} else if (strcmp(algName, "RR") == 0) {
 		routingAlgorithm = ALG_RR;
 		schedulingAlgorithm = "RR";
@@ -326,47 +329,49 @@ void Scheduler::handleMessage(cMessage *msg) {
 			}
 			//cout << "maxQLength chosen: " << queueIndex << endl;
 			break;
-		case ALG_WFQ:
-#if 0
-			// don't remember the last queue chosen (no RR)
-		for( i=_nofCoS-1; i>-1; i-- ) {
-			if( wfq_counter[i] == wfq_weight[i] ) {
-				wfq_counter[i] = 0;
+		case ALG_WFQ_RR:
+
+			// remember which priority queue was chosen last ->RR manner (closer to literature, kurose04)
+			if (_rrCounter < 0)	// reset
+				_rrCounter = _nofCoS-1;
+
+			if( wfq_counter[_rrCounter] == wfq_weight[_rrCounter] ) {
+				wfq_counter[_rrCounter] = 0;
 			}
-			if( wfq_counter[i] < wfq_weight[i] ) {
-				if (getQueue(i)->length() > 0) { // try up to wfq_weight[i] times
-					queueIndex = i;
+			if( wfq_counter[_rrCounter] < wfq_weight[_rrCounter] ) {
+				if (getQueue(_rrCounter)->length() > 0) { // try up to wfq_weight[i] times
+					queueIndex = _rrCounter;
+					_rrCounter = queueIndex;
 				} else {
 					queueIndex = -1;
+					_rrCounter--;
 				}
-				wfq_counter[i]++;
+				wfq_counter[_rrCounter]++;
 				if( queueIndex!=-1)
 					break;
 			}
-		}
-		//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
-#else
-		// remember which priority queue was chosen last ->RR manner (closer to literature, kurose04)
-		if (_rrCounter < 0)	// reset
-			_rrCounter = _nofCoS-1;
+			//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
+			//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
+			break;
+		case ALG_WFQ_HP:
 
-		if( wfq_counter[_rrCounter] == wfq_weight[_rrCounter] ) {
-			wfq_counter[_rrCounter] = 0;
-		}
-		if( wfq_counter[_rrCounter] < wfq_weight[_rrCounter] ) {
-			if (getQueue(_rrCounter)->length() > 0) { // try up to wfq_weight[i] times
-				queueIndex = _rrCounter;
-				_rrCounter = queueIndex;
-			} else {
-				queueIndex = -1;
-				_rrCounter--;
+			// don't remember the last queue chosen, start again from highest priority (no RR)
+			for( i=_nofCoS-1; i>-1; i-- ) {
+				if( wfq_counter[i] == wfq_weight[i] ) {
+					wfq_counter[i] = 0;
+				}
+				if( wfq_counter[i] < wfq_weight[i] ) {
+					if (getQueue(i)->length() > 0) { // try up to wfq_weight[i] times
+						queueIndex = i;
+					} else {
+						queueIndex = -1;
+					}
+					wfq_counter[i]++;
+					if( queueIndex!=-1)
+						break;
+				}
 			}
-			wfq_counter[_rrCounter]++;
-			if( queueIndex!=-1)
-				break;
-		}
-		//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
-#endif
+			//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
 			//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
 			break;
 

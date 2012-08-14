@@ -31,7 +31,8 @@ enum alg {
 	 ALG_RR,
      ALG_SQF,
      ALG_LQF,
-     ALG_WFQ,
+     ALG_WFQ_RR,
+     ALG_WFQ_HP,
      ALG_FCFS,
      ALG_WRR,
      ALG_FQSW

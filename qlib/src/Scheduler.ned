@@ -12,7 +12,7 @@ simple Scheduler
     parameters:
         @group(Queueing);
         @display("i=block/routing");
-        string routingAlgorithm @enum("FCFS", "RR", "WRR", "SQF", "LQF", "WFQ", "FQSW") = default("RR");
+        string routingAlgorithm @enum("FCFS", "RR", "WRR", "SQF", "LQF", "WFQ_RR", "WFQ_HP", "FQSW") = default("RR");
         volatile int randomGateIndex = default(intuniform(0, sizeof(out)-1));    // the destination gate in case of random routing
         
         double startTime @unit(s) = default(0); // when the module sends out the first packet
