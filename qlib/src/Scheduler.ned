@@ -12,7 +12,7 @@ simple Scheduler
     parameters:
         @group(Queueing);
         @display("i=block/routing");
-        string routingAlgorithm @enum("FCFS", "RR", "WRR", "SQF", "LQF", "WFQ", "FQSW") = default("FCFS");
+        string routingAlgorithm @enum("FCFS", "RR", "WRR", "SQF", "LQF", "WFQ", "FQSW") = default("RR");
         volatile int randomGateIndex = default(intuniform(0, sizeof(out)-1));    // the destination gate in case of random routing
         
         double startTime @unit(s) = default(0); // when the module sends out the first packet
@@ -21,26 +21,26 @@ simple Scheduler
     	int nofCoS = default(8);	// default: 7..0
     	
     	// N=8
-    	int weight7 = default(4);	// weight used in WFQ
-    	int weight6 = default(3);	// weight used in WFQ
-    	int weight5 = default(3);	// weight used in WFQ
-    	int weight4 = default(3);	// weight used in WFQ
-    	int weight3 = default(3);	// weight used in WFQ
+    	int weight7 = default(4);	// weight used by WFQ
+    	int weight6 = default(3);	// weight used by WFQ
+    	int weight5 = default(3);	// weight used by WFQ
+    	int weight4 = default(3);	// weight used by WFQ
+    	int weight3 = default(3);	// weight used by WFQ
     	// N=8 / N=3
-    	int weight2 = default(3);	// weight used in WFQ
-    	int weight1 = default(3);	// weight used in WFQ
-    	int weight0 = default(3);	// weight used in WFQ
+    	int weight2 = default(3);	// weight used by WFQ
+    	int weight1 = default(3);	// weight used by WFQ
+    	int weight0 = default(3);	// weight used by WFQ
 
     	// N=8
-    	int wrr_weight7 = default(10);	// weight used in WRR
-    	int wrr_weight6 = default(6);	// weight used in WRR
-    	int wrr_weight5 = default(5);	// weight used in WRR
-    	int wrr_weight4 = default(4);	// weight used in WRR
-    	int wrr_weight3 = default(3);	// weight used in WRR
+    	int wrr_weight7 = default(10);	// weight used by WRR
+    	int wrr_weight6 = default(6);	// weight used by WRR
+    	int wrr_weight5 = default(5);	// weight used by WRR
+    	int wrr_weight4 = default(4);	// weight used by WRR
+    	int wrr_weight3 = default(3);	// weight used by WRR
     	// N=8 / N=3
-    	int wrr_weight2 = default(3);	// weight used in WRR
-    	int wrr_weight1 = default(2);	// weight used in WRR
-    	int wrr_weight0 = default(1);	// weight used in WRR
+    	int wrr_weight2 = default(3);	// weight used by WRR
+    	int wrr_weight1 = default(2);	// weight used by WRR
+    	int wrr_weight0 = default(1);	// weight used by WRR
     	
     gates:
         input in[];

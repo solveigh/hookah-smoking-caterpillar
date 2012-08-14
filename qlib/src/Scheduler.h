@@ -44,34 +44,36 @@ class QUEUEING_API Scheduler : public cSimpleModule
 {
     private:
 	    string schedulingAlgorithm;
-        int routingAlgorithm;  // the algorithm we are using for routing
-        int rrCounter;         // msgCounter for round robin routing
+        int routingAlgorithm;  // the algorithm we are using for scheduling
 
-        cDatarateChannel *channel;
+        cDatarateChannel *channel;	// reference to the output channel
         IPassiveQueue *getQueue(int index);
-        simtime_t startTime;
-        simtime_t serviceTime;
-        // receive trigger messages
-        cMessage *triggerServiceMsg;
+
+        simtime_t startTime;	// start-time of the simulation
+        simtime_t serviceTime;	// emulate internal clock cycle of WRS
+
+        cMessage *triggerServiceMsg;	// receive trigger messages
 
         int _nofCoS;	// default: 7..0
-        IPassiveQueue *_q7;
-
-        IPassiveQueue *_q2;
+        IPassiveQueue *_q7;	// reference to priority queue 7
+        IPassiveQueue *_q2;	// reference to priority queue 2
 
         // pointer to other queues
         std::vector<IPassiveQueue*> _qs;
 
-        void determineQueueSizes();
+        void determineQueueSizes();	// print queue's capacities
 
         map<int, int> _mapQSizes;	// length, queue index
 
-		// Time for the Interframe Gap
-		simtime_t _ifg;
+		simtime_t _ifg;	// Time for the Interframe Gap
 
-        // wfq
+		// RR / WRR
+		int _rrCounter;         // counter for round robin scheduling
+
+        // WFQ
 		int wfq_weight[8];	// only 0..3 are used for _nofCoS=3
 		int wfq_counter[8];	// only 0..3 are used for _nofCoS=3
+
         int _weight7;
         int _weight6;
         int _weight5;
@@ -92,10 +94,9 @@ class QUEUEING_API Scheduler : public cSimpleModule
         int _counter1;
         int _counter0;
 
-        // priority
-        int _priorityCounter;
 
-        // fcfs
+        // FCFS
+        string getQueueName(int index);
         map<double,int> _mapPacketAges;
 
 		bool file_delete(std::string filename) {
@@ -111,17 +112,12 @@ class QUEUEING_API Scheduler : public cSimpleModule
         int queue_credit[8];	// only 0..3 are used for _nofCoS=3
     	int credit_counter[8];	// only 0..3 are used for _nofCoS=3
     	int weight[8];	// only 0..3 are used for _nofCoS=3
-    	int _packet_size;	// size of the payload of a packet
     	int _ifgBytes;	// Interframe Gap
 
-        int determinOperationCount(int routingAlgorithm);
-
-        // my
+        // FQSW
+    	// calculate queue credits dynamically, return queue index if queue has enough credit
         int determineQIndex(map<int, int>::iterator mit, int priority);
         set<int> _highestIndex;
-
-        // fcfs
-        string getQueueName(int index);
 
     protected:
         virtual void initialize();

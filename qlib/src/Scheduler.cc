@@ -34,7 +34,7 @@ void Scheduler::initialize() {
 	cout << "Router nofCoS " << _nofCoS << endl;
 
 	if( _nofCoS==8 ) {
-			rrCounter = 7;
+			_rrCounter = 7;
 
 			// keep a pointer to queue 7
 			_q7 = getQueue(7);
@@ -84,11 +84,9 @@ void Scheduler::initialize() {
 			weight[1] = _weight7 - 3;
 			weight[0] = _weight7 - 4;
 #endif
-			// priority
-			_priorityCounter = 7;
 
 	} else if( _nofCoS==3 ) {
-		rrCounter = 2;
+		_rrCounter = 2;
 
 		// keep a pointer to queue 2
 		_q2 = getQueue(2);
@@ -112,11 +110,7 @@ void Scheduler::initialize() {
 		weight[2] = _weight7 - 3;
 		weight[1] = _weight7 - 3;
 		weight[0] = _weight7 - 4;
-
-		// priority
-		_priorityCounter = 2;
-
-	}
+	} // if( _nofCoS==3 )
 
 	cGate* outputgate = gate("pppg");
 	channel = check_and_cast<cDatarateChannel *>(
@@ -128,9 +122,8 @@ void Scheduler::initialize() {
 	// trigger first scheduling operation
 	triggerServiceMsg = new cMessage("triggerServiceMessage");
 	scheduleAt(startTime, triggerServiceMsg);
-	//scheduleAt(serviceTime, triggerServiceMsg); // trigger starting requests
 
-	// wrr
+	// WRR
 	for (int i = 0; i < _nofCoS; i++) {
 		credit_counter[i] = 0;
 		queue_credit[i] = 0;
@@ -155,193 +148,57 @@ void Scheduler::handleMessage(cMessage *msg) {
 	cQueue *q2;
 	string qname;
 
-	int queueIndex = -1; // by default we drop the message
+	int queueIndex = -1; // by default we drop the packet
 
 	if (msg == triggerServiceMsg) {
-		// a trigger event arrived
+		// a trigger event arrived (either packet transmission finished or simulated cycle event)
 		switch (routingAlgorithm) {
-		/*case ALG_RANDOM: // N=8, N=3
-			queueIndex = 0 + int(gateSize("in") * rand() / (RAND_MAX + 1.0));
-			opcnt = 1;
-			//cout << __FILE__ << " " << simTime() << " gatesize in " << gateSize("in") << " randomQIndex " << queueIndex << endl;
-			break;
-		case ALG_ROUND_ROBIN:  // N=8, N=3
-			// default RR
-			queueIndex = rrCounter;
-			rrCounter = (rrCounter + 1) % gateSize("in");
-			opcnt = 1;
-			//cout << __FILE__ << " " << simTime() << " gatesize in " << gateSize("in") << " RR " << rrCounter << " " << queueIndex << endl;
-			break;*/
-		case ALG_WRR: // N=8, N=3
-			queue_credit[rrCounter] = 1000000000 * weight[rrCounter] / 1000000;
-			if (getQueue(rrCounter)->length() > 0) {
-				if (credit_counter[rrCounter] == 0)
-					credit_counter[rrCounter] = queue_credit[rrCounter];
-				_packet_size = getQueue(rrCounter)->front()->getByteLength();
-				//cout << "rrCounter: " << rrCounter << " psize " << packet_size << " creditcnt " << credit_counter[rrCounter] << " " << queue_credit[rrCounter] << endl;
-				if ((_packet_size + _ifg) <= credit_counter[rrCounter]) {
-					queueIndex = rrCounter;
-					credit_counter[rrCounter] -= _packet_size + _ifgBytes;
-					//cout << " creditcnt " << credit_counter[rrCounter] << " " << queue_credit[rrCounter] << endl;
-					if (credit_counter[rrCounter] == 0) {
-						rrCounter = (rrCounter + 1) % _nofCoS;
+
+		case ALG_FCFS: // K=8, K=3
+			// check packets in all queues, chose oldest
+			_mapPacketAges.clear();
+			for(int k=(_nofCoS-1); k>-1; k--) {
+				IPassiveQueue *q = getQueue(k);
+				if(q->length()>0){
+
+					// implementation trick to treat all available priority queues as a single queue
+					// iterate over all packets in queue
+					qname = getQueueName(k);
+					cQueue cq = q->getQueue();
+					//cout << "1 " << qname << " " << cq.length();
+					if( q2 != NULL ) {
+						cQueue::Iterator qit = cQueue::Iterator(cq,false);
+						while(!qit.end()) {
+							WRPacket *p = (WRPacket*)(cObject*)qit();
+							double s = p->getCreationTime().dbl();
+							_mapPacketAges.insert( pair< double, int >(s, k) );
+							qit++;
+						}
 					}
-					break;
-				} else {
-					// give more credit
-					credit_counter[rrCounter] += queue_credit[rrCounter];
-					rrCounter = (rrCounter + 1) % _nofCoS;
 				}
+			}
+			//cout << "# packets " << _mapPacketAges.size() << endl;
+
+			if( _mapPacketAges.size()==1) {
+				queueIndex = _mapPacketAges.begin()->second;
+			}else if(_mapPacketAges.size()>0) {
+				sit = _mapPacketAges.end();
+				sit--;
+				queueIndex = sit->second;
 			} else {
-				credit_counter[rrCounter] = 0;
-				// goto next queue
-				rrCounter = (rrCounter + 1) % _nofCoS;
+				queueIndex = -1;
 			}
-			//cout << "WRR chosen " << queueIndex << endl;
+
+			//cout << "FCFS chosen " << queueIndex << endl;
+			//cout << "fcfs list size " << _fcfsQueueServeList.size() << " chosen " << queueIndex << endl;
 			break;
-		case ALG_SQF:
-			if( _nofCoS==8 ) {
-				// highest priority
-				if (_q7->length() > 0) {
-					queueIndex = 7;
-				}
-			} else if(_nofCoS==3) {
-				// highest priority
-				if (_q2->length() > 0) {
-					queueIndex = 2;
-				}
-			}
-			if( ((_nofCoS==8)&&(_q7->length()==0)) || ((_nofCoS==3)&&(_q2->length()==0)) ) {
-				_mapQSizes.clear();
-				// sort queues in ascending order according to their length
-				for (it = _qs.begin(); it != _qs.end(); it++, i--) {
-					if ((*it)->length() > 0) {
-						_mapQSizes.insert(pair<int, int>((*it)->length(), i));
-					}
-				}
-				if (_mapQSizes.size() > 0) {
-					queueIndex = _mapQSizes.begin()->second; // shortest queue will be in the beginning
-				} else
-					queueIndex = -1;
-			}
-			//cout << "minQLength chosen: " << queueIndex << endl;
-			break;
-		case ALG_LQF:
-			if( _nofCoS==8 ) {
-				// highest priority
-				if (_q7->length() > 0) {
-					queueIndex = 7;
-				}
-			} else if(_nofCoS==3) {
-				// highest priority
-				if (_q2->length() > 0) {
-					queueIndex = 2;
-				}
-			}
-			if( ((_nofCoS==8)&&(_q7->length()==0)) || ((_nofCoS==3)&&(_q2->length()==0)) ) {
-				_mapQSizes.clear();
-				// sort queues in ascending order according to their length
-				for (it = _qs.begin(); it != _qs.end(); it++, i--) {
-					if ((*it)->length() > 0) {
-						_mapQSizes.insert(pair<int, int>((*it)->length(), i));
-					}
-				}
-				if (_mapQSizes.size() > 0) {
-					mit = _mapQSizes.end(); // longest queue will be in the end
-					mit--;
-					queueIndex = (*mit).second;
-				} else {
-					queueIndex = -1;
-				}
-			}
-			//cout << "maxQLength chosen: " << queueIndex << endl;
-			break;
-		case ALG_WFQ:
-		
+
+		case ALG_RR: // K=8, K=3
 #if 1
-		if( (_nofCoS==8) || (_nofCoS==3) ) {
-			// TODO remember which queue was served last???
-			for( i=_nofCoS-1; i>-1; i-- ) {
-				if( wfq_counter[i] == wfq_weight[i] ) {
-					wfq_counter[i] = 0;
-				}
-				if( wfq_counter[i] < wfq_weight[i] ) {
-					if (getQueue(i)->length() > 0) { // try up to wfq_weight[i] times
-						queueIndex = i;
-					} else {
-						queueIndex = -1;
-					}
-					wfq_counter[i]++;
-					if( queueIndex!=-1)
-						break;
-				}
-			}
-			//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
-		}
-#else
-			if( _nofCoS==8 ) {
-				if (_counter7 < _weight7) {
-					if (_q7->length() > 0) { // try up to _weight7 times
-						queueIndex = _nofCoS-1;
-					}
-					_counter7++;
-					break;
-				} else {
-					if (_counter6 < (_weight7 - 1)) {
-						if (getQueue(_nofCoS-2)->length() > 0) { // try up to _weight7-1 times
-							queueIndex = _nofCoS-2;
-						}
-						_counter6++;
-						break;
-					} else if (_counter6 == (_weight7 - 1)) {
-						// 5..0
-						i = _nofCoS - 3;
-						//for (it = _qs.begin(); it!=_qs.end(); it++, i--) {
-						for (i = _nofCoS - 3; i > -1; i--) {
-							if (getQueue(i)->length() > 0) {
-								queueIndex = i;
-								break;
-							}
-						}
-						_counter6 = 0;
-					}
-					if (_counter7 == _weight7)
-						_counter7 = 0;
-				}
-			} else if(_nofCoS==3) {
-				if (_counter2 < _weight2) {
-					if (_q2->length() > 0) { // try up to _weight2 times
-						queueIndex = _nofCoS-1;
-					}
-					_counter2++;
-					break;
-				} else {
-					if (_counter1 < (_weight2 - 1)) {
-						if (getQueue(_nofCoS-2)->length() > 0) { // try up to _weight2-1 times
-							queueIndex = _nofCoS-2;
-						}
-						_counter1++;
-						break;
-					} else if (_counter1 == (_weight2 - 1)) {
-						// 0
-						if (getQueue(0)->length() > 0) {
-							queueIndex = 0;
-						}
-						_counter1 = 0;
-					}
-					if (_counter2 == _weight2)
-						_counter2 = 0;
-				}
-			}
-#endif
-			//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
-			break;
-		case ALG_RR: // N=8, N=3
-#if 1
-			if (_priorityCounter < 0)	// reset
-				_priorityCounter = _nofCoS-1;
-			queueIndex = _priorityCounter;
-			_priorityCounter--;
+			if (_rrCounter < 0)	// reset
+				_rrCounter = _nofCoS-1;
+			queueIndex = _rrCounter;
+			_rrCounter--;
 #else
 			/*maciej lipinski, cern, email 10.01.2012
 			1. wait for the current package to be sent (regardless off the priority)
@@ -377,120 +234,143 @@ void Scheduler::handleMessage(cMessage *msg) {
 #endif
 			//cout << "priority chosen: " << queueIndex << endl;
 			break;
-		case ALG_FCFS: // N=8, N=3
-			//queueIndex = getFromQueueServeList();
-			//queueIndex = retrieveFromQueueServeList(); // last approach
 
-			// check packets in all queues, chose oldest
-			_mapPacketAges.clear();
-			for(int k=(_nofCoS-1); k>-1; k--) {
-				IPassiveQueue *q = getQueue(k);
-				if(q->length()>0){
-					//WRPacket*p = q->front();
-					//double s = p->getCreationTime().dbl();
+		case ALG_WRR: // K=8, K=3
+			// adjust priority queues credit to bandwidth (1 Gbps)
+			queue_credit[_rrCounter] = 1000000000 * weight[_rrCounter] / 1000000;
 
-					// iterate over all packets in queue???
-					qname = getQueueName(k);
-					cQueue cq = q->getQueue();
-					//cout << "1 " << qname << " " << cq.length();
-					if( q2 != NULL ) {
-						cQueue::Iterator qit = cQueue::Iterator(cq,false);
-						while(!qit.end()) {
-							WRPacket *p = (WRPacket*)(cObject*)qit();	// TODO does this really remove the packet from the queue?
-							//cObject *o = cq.remove((cObject*)qit());
-							//cout << " 2 " << cq.length() << endl;
-							double s = p->getCreationTime().dbl();
-							_mapPacketAges.insert( pair< double, int >(s, k) );
-							qit++;
-						}
+			// consider priority queue only if it stores packets
+			if (getQueue(_rrCounter)->length() > 0) {
+				if (credit_counter[_rrCounter] == 0)
+					credit_counter[_rrCounter] = queue_credit[_rrCounter];
+				int packet_size = getQueue(_rrCounter)->front()->getByteLength();
+				//cout << "_rrCounter: " << _rrCounter << " psize " << packet_size << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
+				if ((packet_size + _ifg) <= credit_counter[_rrCounter]) {
+					// if queue's credit is still available
+					queueIndex = _rrCounter;
+					credit_counter[_rrCounter] -= packet_size + _ifgBytes;
+					//cout << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
+					if (credit_counter[_rrCounter] == 0) {
+						_rrCounter = (_rrCounter + 1) % _nofCoS;
 					}
-				}
-			}
-			//cout << "# packets " << _mapPacketAges.size() << endl;
-
-			/*for( sit=_mapPacketAges.begin(); sit !=_mapPacketAges.end(); sit++ ){
-				cout << "prio " << sit->second << " " << sit->first << endl;
-			}*/
-			if( _mapPacketAges.size()==1) {
-				queueIndex = _mapPacketAges.begin()->second;
-			}else if(_mapPacketAges.size()>0) {
-				sit = _mapPacketAges.end();
-				sit--;
-				queueIndex = sit->second;
-			} else {
-				queueIndex = -1;
-			}
-
-			//cout << "FCFS chosen " << queueIndex << endl;
-			//cout << "fcfs list size " << _fcfsQueueServeList.size() << " chosen " << queueIndex << endl;
-			break;
-		/*case ALG_MIXED:
-			if( _nofCoS==8 ) {
-				// 7, fcfs
-				if (_q7->length() > 0) {
-					queueIndex = _nofCoS-1;
 					break;
+				} else {
+					// give more credit to a queue if needed
+					credit_counter[_rrCounter] += queue_credit[_rrCounter];
+					_rrCounter = (_rrCounter + 1) % _nofCoS;
 				}
-				if (queueIndex == -1) {
-					// 6..4, lqf
-					p30.clear();
-					for (int j = (_nofCoS-2); j > (_nofCoS-5); j--) {
-						//cout << "j " << j << " " << _qs.at(j)->length() << " " << getQueue(j)->length() << endl;
-						p30.push_back(getQueue(j));
-					}
-
-					//determineQueueSizes();
-					_mapQSizes.clear();
-					i = _nofCoS - 2;
-					// request oldest packet first (supposedly in longest queue)
-					for (it = p30.begin(); it != p30.end(); it++, i--) {
-						if ((*it)->length() > 0) {
-							//cout << i << ": " << (*it)->length() << endl;
-							_mapQSizes.insert(pair<int, int>((*it)->length(), i));
-						}
-					}
-					if (_mapQSizes.size() > 0) {
-						mit = _mapQSizes.end();
-						mit--;
-						queueIndex = (*mit).second;
-						//cout << simTime() << " mixed chosen: " << queueIndex << endl;
-					} else {
-						queueIndex = -1;
-					}
-				}
-				if (queueIndex == -1) {
-					// sqf, 3..0
-					p30.clear();
-					for (int j = 3; j > -1; j--) {
-						//cout << "j " << j << " " << _qs.at(j)->length() << " " << getQueue(j)->length() << endl;
-						p30.push_back(getQueue(j));
-					}
-
-					_mapQSizes.clear();
-					i = _nofCoS - 5;
-					// request oldest packet first (supposedly in longest queue)
-					for (it = p30.begin(); it != p30.end(); it++, i--) {
-						if ((*it)->length() > 0) {
-							//cout << i << ": " << (*it)->length() << endl;
-							_mapQSizes.insert(pair<int, int>((*it)->length(), i));
-						}
-					}
-					if (_mapQSizes.size() > 0) {
-						mit = _mapQSizes.begin();
-						queueIndex = (*mit).second;
-						//cout << simTime() << " mixed chosen: " << queueIndex << endl;
-					} else {
-						queueIndex = -1;
-					}
+			} else {
+				// reset credit counter
+				credit_counter[_rrCounter] = 0;
+				// goto next priority queue
+				_rrCounter = (_rrCounter + 1) % _nofCoS;
+			}
+			//cout << "WRR chosen " << queueIndex << endl;
+			break;
+		case ALG_SQF:
+			if( _nofCoS==8 ) {
+				// highest priority is 7
+				if (_q7->length() > 0) {
+					queueIndex = 7;
 				}
 			} else if(_nofCoS==3) {
-				EV << "This algorithm doesn't make sense for N=3.\n";
-				cout << "This algorithm doesn't make sense for N=3." << endl;
-				exit(0);
+				// highest priority is 2
+				if (_q2->length() > 0) {
+					queueIndex = 2;
+				}
 			}
-			//cout << simTime() << " mixed chosen: " << queueIndex << endl;
-			break;*/
-		case ALG_FQSW: // N=8, N=3
+			// sort the other priority queues only if the highest priority queues are empty
+			if( (queueIndex==-1) && (((_nofCoS==8)&&(_q7->length()==0)) || ((_nofCoS==3)&&(_q2->length()==0))) ) {
+				_mapQSizes.clear();
+				// sort queues in ascending order according to their length
+				for (it = _qs.begin(); it != _qs.end(); it++, i--) {
+					if ((*it)->length() > 0) {
+						_mapQSizes.insert(pair<int, int>((*it)->length(), i));
+					}
+				}
+				if (_mapQSizes.size() > 0) {
+					queueIndex = _mapQSizes.begin()->second; // shortest queue will be in the beginning
+				} else
+					queueIndex = -1;
+			}
+			//cout << "minQLength chosen: " << queueIndex << endl;
+			break;
+		case ALG_LQF:
+			if( _nofCoS==8 ) {
+				// highest priority
+				if (_q7->length() > 0) {
+					queueIndex = 7;
+				}
+			} else if(_nofCoS==3) {
+				// highest priority
+				if (_q2->length() > 0) {
+					queueIndex = 2;
+				}
+			}
+			// sort the other priority queues only if the highest priority queues are empty
+			if( (queueIndex==-1) && ( ((_nofCoS==8)&&(_q7->length()==0)) || ((_nofCoS==3)&&(_q2->length()==0))) ) {
+				_mapQSizes.clear();
+				// sort queues in ascending order according to their length
+				for (it = _qs.begin(); it != _qs.end(); it++, i--) {
+					if ((*it)->length() > 0) {
+						_mapQSizes.insert(pair<int, int>((*it)->length(), i));
+					}
+				}
+				if (_mapQSizes.size() > 0) {
+					mit = _mapQSizes.end(); // longest queue will be in the end
+					mit--;
+					queueIndex = (*mit).second;
+				} else {
+					queueIndex = -1;
+				}
+			}
+			//cout << "maxQLength chosen: " << queueIndex << endl;
+			break;
+		case ALG_WFQ:
+#if 0
+			// don't remember the last queue chosen (no RR)
+		for( i=_nofCoS-1; i>-1; i-- ) {
+			if( wfq_counter[i] == wfq_weight[i] ) {
+				wfq_counter[i] = 0;
+			}
+			if( wfq_counter[i] < wfq_weight[i] ) {
+				if (getQueue(i)->length() > 0) { // try up to wfq_weight[i] times
+					queueIndex = i;
+				} else {
+					queueIndex = -1;
+				}
+				wfq_counter[i]++;
+				if( queueIndex!=-1)
+					break;
+			}
+		}
+		//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
+#else
+		// remember which priority queue was chosen last ->RR manner (closer to literature, kurose04)
+		if (_rrCounter < 0)	// reset
+			_rrCounter = _nofCoS-1;
+
+		if( wfq_counter[_rrCounter] == wfq_weight[_rrCounter] ) {
+			wfq_counter[_rrCounter] = 0;
+		}
+		if( wfq_counter[_rrCounter] < wfq_weight[_rrCounter] ) {
+			if (getQueue(_rrCounter)->length() > 0) { // try up to wfq_weight[i] times
+				queueIndex = _rrCounter;
+				_rrCounter = queueIndex;
+			} else {
+				queueIndex = -1;
+				_rrCounter--;
+			}
+			wfq_counter[_rrCounter]++;
+			if( queueIndex!=-1)
+				break;
+		}
+		//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
+#endif
+			//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
+			break;
+
+		case ALG_FQSW: // K=8, K=3
 			// consider only queues with contents
 			// assign weights according to priority and fullness
 			// maybe similar to DRR, credits according to bandwidth
@@ -510,7 +390,7 @@ void Scheduler::handleMessage(cMessage *msg) {
 				//map<int,int>::iterator mit;
 				for (mit = _mapQSizes.begin(); mit != _mapQSizes.end(); mit++) {
 					//cout << "prio: " << mit->first << " length " << mit->second << endl;
-					queueIndex = determineQIndex(mit, mit->first); // TODO determine highest
+					queueIndex = determineQIndex(mit, mit->first); // determine queue weights dynamically
 					_highestIndex.insert(queueIndex);
 
 				}
@@ -570,51 +450,31 @@ void Scheduler::handleMessage(cMessage *msg) {
 
 int Scheduler::determineQIndex(map<int, int>::iterator mit, int priority) {
 	int queueIndex = -1;
-	weight[priority] = (mit->first + 1) * (mit->second); // ensure that priority 0 will be considered as well
-	queue_credit[priority] = (1000 * weight[priority]);
+
+	// calculate weight dynamically by multiplying priority and queue length
+	// +1: ensure that priority 0 will be considered as well
+	weight[priority] = (mit->first + 1) * (mit->second);
+
+	// adjust to bandwidth of 1 Gbps
+	queue_credit[priority] = (1000 * weight[priority]);	// re-assign queue credit (is this a good idea to keep the old values? in the next cycle queue lengths will have changed)
 	//cout << " queue_credit["<<priority<<"] " << queue_credit[priority] << " weight["<<priority<<"] " << weight[priority] << " credit_cnt " << credit_counter[priority] << endl;
+
 	if (credit_counter[priority] == 0)
 		credit_counter[priority] = queue_credit[priority];
-	_packet_size = getQueue(priority)->front()->getByteLength();
-	credit_counter[priority] -= _packet_size + _ifgBytes;
-	if ((_packet_size + _ifg) <= credit_counter[priority]) {
+	int packet_size = getQueue(priority)->front()->getByteLength();
+	credit_counter[priority] -= packet_size + _ifgBytes;
+
+	// select queue according to available queue credit
+	if ((packet_size + _ifg) <= credit_counter[priority]) {
 		queueIndex = priority;
-		credit_counter[priority] -= _packet_size + _ifgBytes;
+		credit_counter[priority] -= packet_size + _ifgBytes;
 	} else {
 		// give more credit
 		credit_counter[priority] += queue_credit[priority];
+		queueIndex = -1;
 	}
 	return queueIndex;
 } // determineQIndex()
-
-int Scheduler::determinOperationCount(int routingAlgorithm) {
-	int op = -1;
-
-	switch (routingAlgorithm) {
-	case ALG_FCFS:
-		op = 1;
-		break;
-	case ALG_RR:
-		op = _nofCoS;
-		break;
-	case ALG_SQF:
-		op = 1;
-		break;
-	case ALG_LQF:
-		op = 1;
-		break;
-	case ALG_WFQ:
-		op = _nofCoS - 1;
-		break;
-	case ALG_FQSW:
-		op = 1;
-		break;
-	default:
-		break;
-	}
-
-	return op;
-} // determinOperationCount()
 
 IPassiveQueue *Scheduler::getQueue(int index) {
 	std::string queue = "queue";
