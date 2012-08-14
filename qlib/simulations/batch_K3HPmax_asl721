@@ -1,15 +1,15 @@
 #! /bin/sh
 
-NED8=WRS_N8
+NED3=WRS_K3
 
 SRCDIR=/common/home/bel/matthies/lnx/git/solveigh/qlib
-#/common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
+#common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
 SIMDIR=/common/home/bel/matthies/lnx/whiteRabbit/
 
 echo $SRCDIR
 echo $SIMDIR
 
-cd $SIMDIR/asl723/qlib/simulations
+cd $SIMDIR/asl721/qlib/simulations
 
 EDIR=../out/gcc-release/src
 EXECUTABLE=qlib
@@ -22,13 +22,13 @@ chmod +x $EDIR/$EXECUTABLE
 rm -rf *.csv *.tex
 
 # run batch simulation
-./$EDIR/$EXECUTABLE -f omnetppN8minHP.ini -u Cmdenv -c $NED8
-mkdir N8HPmin
-mv *.csv N8HPmin
-mv *.tex N8HPmin
-mv replaceInResults.sh N8HPmin
+./$EDIR/$EXECUTABLE -f omnetppK3maxHP.ini -u Cmdenv -c $NED3
+mkdir K3HPmax
+mv *.csv K3HPmax
+mv *.tex K3HPmax
+mv replaceInResults.sh K3HPmax
 
 
-cd N8HPmin
+cd K3HPmax
 chmod +x replaceInResults.sh 
 ./replaceInResults.sh

@@ -25,9 +25,9 @@ import ned.DatarateChannel;
 //
 // Single WRS Output port
 //
-network WRS_N8
+network WRS_K3
 {
-    @display("bgb=459,565");
+    @display("bgb=459,231");
     types:
         channel pppline extends DatarateChannel
         {
@@ -39,7 +39,7 @@ network WRS_N8
         }
     submodules:
         source: Source {
-            @display("p=37,277");
+            @display("p=34,114");
         }
         queue0: Queue {
             @display("p=186,44");
@@ -50,46 +50,21 @@ network WRS_N8
         queue2: Queue {
             @display("p=186,179");
         }
-        queue3: Queue {
-            @display("p=186,245");
-        }
-        queue4: Queue {
-            @display("p=186,316");
-        }
-        queue5: Queue {
-            @display("p=186,378");
-        }
-        queue6: Queue {
-            @display("p=186,447");
-        }
-        queue7: Queue {
-            @display("p=186,519");
-        }
 
         GbpsSink: Sink {
-            @display("p=423,277");
+            @display("p=421,114");
         }
         scheduler: Scheduler {
-            @display("p=328,277;b=35,39");
+            @display("p=322,114;b=35,39");
         }
     connections:
         source.pppg++ --> pppline --> queue0.in;
         source.pppg++ --> pppline --> queue1.in;
         source.pppg++ --> pppline --> queue2.in;
-        source.pppg++ --> pppline --> queue3.in;
-        source.pppg++ --> pppline --> queue4.in;
-        source.pppg++ --> pppline --> queue5.in;
-        source.pppg++ --> pppline --> queue6.in;
-        source.pppg++ --> pppline --> queue7.in;
 
         queue0.out --> scheduler.in++;
         queue1.out --> scheduler.in++;
         queue2.out --> scheduler.in++;
-        queue3.out --> scheduler.in++;
-        queue4.out --> scheduler.in++;
-        queue5.out --> scheduler.in++;
-        queue6.out --> scheduler.in++;
-        queue7.out --> scheduler.in++;
 
         scheduler.pppg --> pppline --> GbpsSink.in;
         source.saveBurstData --> GbpsSink.saveBurstData;

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-NED8=WRS_N8
+NED8=WRS_K8
 
 EDIR=../out/gcc-release/src
 EXECUTABLE=qlib
@@ -22,15 +22,15 @@ mkdir $SIMDIR/asl724
 #copy qlib to its pc specific directory to avoid file clashes
 cp -r $SRCDIR/ $SIMDIR/asl723/
 cp -r $SRCDIR/ $SIMDIR/asl724/
-cp $SRCDIR/simulations/batch_N8* ~
+cp $SRCDIR/simulations/batch_K8* ~
 
 chmod +x $EDIR/$EXECUTABLE
 #echo $(pwd)
 #echo $(ls $EDIR)
 
 # open different console windows
-gnome-terminal -x sh -c 'ssh -X matthies@asl723; cd /common/home/bel/matthies/lnx/whiteRabbit/asl723/; ./batch_N8HPmin_asl723; exec bash'
+gnome-terminal -x sh -c 'ssh -X matthies@asl723; cd /common/home/bel/matthies/lnx/whiteRabbit/asl723/; ./batch_K8HPmin_asl723; exec bash'
 
-gnome-terminal -x sh -c 'ssh -X matthies@asl724; cd /common/home/bel/matthies/lnx/whiteRabbit/asl724/; ./batch_N8HPmin_asl724; exec bash'
+gnome-terminal -x sh -c 'ssh -X matthies@asl724; cd /common/home/bel/matthies/lnx/whiteRabbit/asl724/; ./batch_K8HPmin_asl724; exec bash'
 
-# after login execute manually ./batch_N8HPmin_asl723 / ./batch_N8HPmax_asl724
+# after login execute manually ./batch_K8HPmin_asl723 / ./batch_K8HPmax_asl724

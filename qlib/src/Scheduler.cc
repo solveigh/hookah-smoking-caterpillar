@@ -558,10 +558,6 @@ void Scheduler::handleMessage(cMessage *msg) {
 								- triggerServiceMsg->getSendingTime()));
 		send(p, "pppg");
 
-		// TODO remove this, not necessary
-		opcnt = determinOperationCount(routingAlgorithm);
-		p->setOperationCounter(p->getOperationCounter() + opcnt);
-
 		// cancel and re-schedule
 		cancelEvent(triggerServiceMsg);
 

@@ -74,11 +74,9 @@ void Queue::enqueue(cPacket* msg) {
 		return;
 	}
 
-	job->setOperationCounter(1);
 	// queue everything
 	queue.insert(job);
 	emit(queueLengthSignal, length());
-	job->setQueueCount(job->getQueueCount() + 1);
 	//std::cout << this->getName() << " Q size " << queue.length() << std::endl;
 } // enequeue()
 
@@ -112,9 +110,6 @@ void Queue::request(int gateIndex)
     }
     emit(queueLengthSignal, length());
 
-    job->setOperationCounter( job->getOperationCounter()+queue.length() );
-
-    job->setQueueCount(job->getQueueCount()+1);
     simtime_t d = simTime() - job->getTimestamp();
     job->setTotalQueueingTime(job->getTotalQueueingTime() + d);
     //cout << "queuingTime " << job->getTotalQueueingTime() << endl;

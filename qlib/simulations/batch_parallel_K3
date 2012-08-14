@@ -1,6 +1,6 @@
 #! /bin/sh
 
-NED3=WRS_N3
+NED3=WRS_K3
 
 EDIR=../out/gcc-release/src
 EXECUTABLE=qlib
@@ -22,15 +22,15 @@ mkdir $SIMDIR/asl721
 #copy qlib to its pc specific directory to avoid file clashes
 cp -r $SRCDIR/ $SIMDIR/asl720/
 cp -r $SRCDIR/ $SIMDIR/asl721/
-cp $SRCDIR/simulations/batch_N3* ~
+cp $SRCDIR/simulations/batch_K3* ~
 
 chmod +x $EDIR/$EXECUTABLE
 #echo $(pwd)
 #echo $(ls $EDIR)
 
 # open different console windows
-gnome-terminal -x sh -c 'ssh -X matthies@asl720; cd /common/home/bel/matthies/lnx/whiteRabbit/asl723/; ./batch_N3HPmin_asl720; exec bash'
+gnome-terminal -x sh -c 'ssh -X matthies@asl720; cd /common/home/bel/matthies/lnx/whiteRabbit/asl723/; ./batch_K3HPmin_asl720; exec bash'
 
-gnome-terminal -x sh -c 'ssh -X matthies@asl721; cd /common/home/bel/matthies/lnx/whiteRabbit/asl724/; ./batch_N3HPmin_asl721; exec bash'
+gnome-terminal -x sh -c 'ssh -X matthies@asl721; cd /common/home/bel/matthies/lnx/whiteRabbit/asl724/; ./batch_K3HPmin_asl721; exec bash'
 
-# after login execute manually ./batch_N3HPmin_asl720 / ./batch_N3HPmax_asl721
+# after login execute manually ./batch_K3HPmin_asl720 / ./batch_K3HPmax_asl721

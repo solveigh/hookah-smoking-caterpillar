@@ -1,6 +1,6 @@
 #! /bin/sh
 
-NED3=WRS_N3
+NED3=WRS_K3
 
 SRCDIR=/common/home/bel/matthies/lnx/git/solveigh/qlib
 #/common/home/bel/matthies/lnx/whiteRabbit/omnetpp-4.2/workspace/qlib
@@ -22,13 +22,13 @@ chmod +x $EDIR/$EXECUTABLE
 rm -rf *.csv *.tex
 
 # run batch simulation
-./$EDIR/$EXECUTABLE -f omnetppN3minHP.ini -u Cmdenv -c $NED3
-mkdir N3HPmin
-mv *.csv N3HPmin
-mv *.tex N3HPmin
-mv replaceInResults.sh N3HPmin
+./$EDIR/$EXECUTABLE -f omnetppK3minHP.ini -u Cmdenv -c $NED3
+mkdir K3HPmin
+mv *.csv K3HPmin
+mv *.tex K3HPmin
+mv replaceInResults.sh K3HPmin
 
 
-cd N3HPmin
+cd K3HPmin
 chmod +x replaceInResults.sh 
 ./replaceInResults.sh
