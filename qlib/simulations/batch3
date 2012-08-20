@@ -1,6 +1,6 @@
 #! /bin/sh
 
-NED3=WRS_N3
+NED3=WRS_K3
 
 #EDIR=../out/gcc-debug/src
 EDIR=../out/gcc-release/src
@@ -13,7 +13,12 @@ chmod +x $EDIR/$EXECUTABLE
 
 rm -rf *.csv *.tex
 
-./$EDIR/$EXECUTABLE -f omnetppN3minHP.ini -u Cmdenv -c $NED3
-mkdir N3HPmin
-mv *.csv N3HPmin
-mv *.tex N3HPmin
+./$EDIR/$EXECUTABLE -f omnetppK3minHP.ini -u Cmdenv -c $NED3
+mkdir K3HPmin
+mv *.csv K3HPmin
+mv *.tex K3HPmin
+cp replaceInResults.sh K3HPmin
+
+cd K3HPmin
+chmod +x replaceInResults.sh 
+./replaceInResults.sh

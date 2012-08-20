@@ -1,6 +1,6 @@
 #! /bin/sh
 
-NED3=WRS_K3
+NED8=WRS_K8
 
 #EDIR=../out/gcc-debug/src
 EDIR=../out/gcc-release/src
@@ -13,12 +13,12 @@ chmod +x $EDIR/$EXECUTABLE
 
 rm -rf *.csv *.tex
 
-./$EDIR/$EXECUTABLE -f omnetppK3maxHP.ini -u Cmdenv -c $NED3
-mkdir K3HPmax
-mv *.csv K3HPmax
-mv *.tex K3HPmax
-cp replaceInResults.sh K3HPmax
+./$EDIR/$EXECUTABLE -f omnetppK8maxHP.ini -u Cmdenv -c $NED8
+mkdir K8HPmax
+mv *.csv K8HPmax
+mv *.tex K8HPmax
+cp replaceInResults.sh K8HPmax
 
-cd K3HPmax
+cd K8HPmax
 chmod +x replaceInResults.sh 
 ./replaceInResults.sh

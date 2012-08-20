@@ -667,7 +667,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 	char buf[200];
 	if( _nofCoS==8 ) {
     	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-    		sprintf(buf,"Scenario,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf",
+    		sprintf(buf,"Scenario,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
     				7,7,7.0,
     				6,6,6.0,
     				5,5,5.0,
@@ -690,7 +690,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf",
+		sprintf(buf,"%s,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
 				_source->getInputDataFileName().c_str(),
 				_source->getSent().at(7),_qs.at(7)->getDropped().size(), d7,
 				_source->getSent().at(6),_qs.at(6)->getDropped().size(), d6,
@@ -704,7 +704,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		Useful::getInstance()->appendToFile(filename, str);
 	} else if(_nofCoS==3) {
     	if( !Useful::getInstance()->testFirstLineOfFile(filename, "Scenario") ) {
-    		sprintf(buf,"Scenario,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf",
+    		sprintf(buf,"Scenario,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf",
     				2,0,2.0,
     				1,1,1.0,
     				0,0,0.0
@@ -717,7 +717,7 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
-		sprintf(buf,"%s,%d,%d,%2.1lf,%d,%d,%2.1lf,%d,%d,%2.1lf", _source->getInputDataFileName().c_str(),
+		sprintf(buf,"%s,%d,%d,%2.2lf,%d,%d,%2.2lf,%d,%d,%2.2lf", _source->getInputDataFileName().c_str(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(), d2,
 				_source->getSent().at(1), _qs.at(1)->getDropped().size(), d1,
 				_source->getSent().at(0), _qs.at(0)->getDropped().size(), d0);

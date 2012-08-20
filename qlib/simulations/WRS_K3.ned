@@ -58,6 +58,9 @@ network WRS_K3
             @display("p=322,114;b=35,39");
         }
     connections:
+        scheduler.pppg --> pppline --> GbpsSink.in;
+        source.saveBurstData --> GbpsSink.saveBurstData;
+        
         source.pppg++ --> pppline --> queue0.in;
         source.pppg++ --> pppline --> queue1.in;
         source.pppg++ --> pppline --> queue2.in;
@@ -66,6 +69,4 @@ network WRS_K3
         queue1.out --> scheduler.in++;
         queue2.out --> scheduler.in++;
 
-        scheduler.pppg --> pppline --> GbpsSink.in;
-        source.saveBurstData --> GbpsSink.saveBurstData;
 }

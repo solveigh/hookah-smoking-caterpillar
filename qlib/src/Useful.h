@@ -16,10 +16,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <string.h>
 
 #ifdef __WINDOWS__
 #include <cstring>
-#include <string.h>
 #endif
 
 using namespace std;

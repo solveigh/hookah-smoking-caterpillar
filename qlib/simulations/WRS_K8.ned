@@ -27,7 +27,7 @@ import ned.DatarateChannel;
 //
 network WRS_K8
 {
-    @display("bgb=459,565");
+    @display("bgb=467,565");
     types:
         channel pppline extends DatarateChannel
         {
@@ -73,6 +73,9 @@ network WRS_K8
             @display("p=328,277;b=35,39");
         }
     connections:
+        scheduler.pppg --> pppline --> GbpsSink.in;
+        source.saveBurstData --> GbpsSink.saveBurstData;
+        
         source.pppg++ --> pppline --> queue0.in;
         source.pppg++ --> pppline --> queue1.in;
         source.pppg++ --> pppline --> queue2.in;
@@ -91,6 +94,5 @@ network WRS_K8
         queue6.out --> scheduler.in++;
         queue7.out --> scheduler.in++;
 
-        scheduler.pppg --> pppline --> GbpsSink.in;
-        source.saveBurstData --> GbpsSink.saveBurstData;
+        
 }

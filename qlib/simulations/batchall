@@ -1,36 +1,9 @@
 #! /bin/sh
 
-NED8=WRS_N8
-NED3=WRS_N3
+./batch1
 
-#EDIR=../out/gcc-debug/src
-EDIR=../out/gcc-release/src
-EXECUTABLE=qlib
+./batch2
 
+./batch3
 
-chmod +x $EDIR/$EXECUTABLE
-#echo $(pwd)
-#echo $(ls $EDIR)
-
-rm -rf *.csv *.tex
-
-#./$EDIR/$EXECUTABLE -f omnetppN8minHP.ini -u Cmdenv -c $NED8
-#mkdir N8HPmin
-#mv *.csv N8HPmin
-#mv *.tex N8HPmin
-
-#./$EDIR/$EXECUTABLE -f omnetppN8maxHP.ini -u Cmdenv -c $NED8
-#mkdir N8HPmax
-#mv *.csv N8HPmax
-#mv *.tex N8HPmax
-
-
-./$EDIR/$EXECUTABLE -f omnetppN3minHP.ini -u Cmdenv -c $NED3
-mkdir N3HPmin
-mv *.csv N3HPmin
-mv *.tex N3HPmin
-
-./$EDIR/$EXECUTABLE -f omnetppN3maxHP.ini -u Cmdenv -c $NED3
-mkdir N3HPmax
-mv *.csv N3HPmax
-mv *.tex N3HPmax
+./batch4

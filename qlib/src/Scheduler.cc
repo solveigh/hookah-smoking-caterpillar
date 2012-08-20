@@ -331,22 +331,24 @@ void Scheduler::handleMessage(cMessage *msg) {
 			break;
 		case ALG_WFQ_RR:
 
-			// remember which priority queue was chosen last ->RR manner (closer to literature, kurose04)
+			// remember which priority queue was chosen last ->RR manner (closer to literature, kurose09)
 			if (_rrCounter < 0)	// reset
 				_rrCounter = _nofCoS-1;
 
-			if( wfq_counter[_rrCounter] == wfq_weight[_rrCounter] ) {
+			if( wfq_counter[_rrCounter] == wfq_weight[_rrCounter] ) {	// reset queues counter
 				wfq_counter[_rrCounter] = 0;
 			}
 			if( wfq_counter[_rrCounter] < wfq_weight[_rrCounter] ) {
 				if (getQueue(_rrCounter)->length() > 0) { // try up to wfq_weight[i] times
 					queueIndex = _rrCounter;
 					_rrCounter = queueIndex;
+					wfq_counter[_rrCounter]++;
 				} else {
 					queueIndex = -1;
+					wfq_counter[_rrCounter]++;
 					_rrCounter--;
 				}
-				wfq_counter[_rrCounter]++;
+				//wfq_counter[_rrCounter]++;
 				if( queueIndex!=-1)
 					break;
 			}
@@ -355,7 +357,8 @@ void Scheduler::handleMessage(cMessage *msg) {
 			break;
 		case ALG_WFQ_HP:
 
-			// don't remember the last queue chosen, start again from highest priority (no RR)
+			// don't remember the last queue chosen since queues states may have changed,
+			// start again from highest priority (no RR)
 			for( i=_nofCoS-1; i>-1; i-- ) {
 				if( wfq_counter[i] == wfq_weight[i] ) {
 					wfq_counter[i] = 0;
@@ -363,10 +366,12 @@ void Scheduler::handleMessage(cMessage *msg) {
 				if( wfq_counter[i] < wfq_weight[i] ) {
 					if (getQueue(i)->length() > 0) { // try up to wfq_weight[i] times
 						queueIndex = i;
+						wfq_counter[i]++;
 					} else {
 						queueIndex = -1;
+						wfq_counter[i]++;
 					}
-					wfq_counter[i]++;
+					
 					if( queueIndex!=-1)
 						break;
 				}
@@ -392,13 +397,13 @@ void Scheduler::handleMessage(cMessage *msg) {
 			}
 			if (_mapQSizes.size() > 0) {
 				// determine weights according to prio and length
-				//map<int,int>::iterator mit;
 				for (mit = _mapQSizes.begin(); mit != _mapQSizes.end(); mit++) {
 					//cout << "prio: " << mit->first << " length " << mit->second << endl;
 					queueIndex = determineQIndex(mit, mit->first); // determine queue weights dynamically
 					_highestIndex.insert(queueIndex);
 
 				}
+				// choose the queue with the highest precedence
 				if (_highestIndex.size() > 0) {
 					set<int>::iterator sit = _highestIndex.end();
 					sit--;
@@ -458,7 +463,17 @@ int Scheduler::determineQIndex(map<int, int>::iterator mit, int priority) {
 
 	// calculate weight dynamically by multiplying priority and queue length
 	// +1: ensure that priority 0 will be considered as well
-	weight[priority] = (mit->first + 1) * (mit->second);
+
+	// assign a minimum weight to each lower priority queue	
+	int priority_weight = (mit->first + 1);
+
+#if 0
+	// allow a minimum to prevent high queuing times for K=8
+	if( (_nofCoS==8) && (priority>3) )
+		priority_weight = 2;
+#endif
+
+	weight[priority] = priority_weight * (mit->second);
 
 	// adjust to bandwidth of 1 Gbps
 	queue_credit[priority] = (1000 * weight[priority]);	// re-assign queue credit (is this a good idea to keep the old values? in the next cycle queue lengths will have changed)

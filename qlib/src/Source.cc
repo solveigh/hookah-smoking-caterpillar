@@ -203,19 +203,19 @@ void Source::sendPacket(WRPacket* packet) {
 
 WRPacket * Source::generatePacket(int priority, int size) {
 	//log("test");
-	char buf[10];
-	sprintf(buf, "%.60s-%d", "p", ++packetCounter);
-	buf[9] = '\0';
-	WRPacket *packet = new WRPacket(buf);
-	packet->setPriority(priority);
-	packet->setByteLength(size);
+	//char buf[10];
+    //sprintf(buf, "%.60s-%d", "p", ++packetCounter);
+    //buf[9] = '\0';
 
 	simtime_t creationTime = simTime();
-	char name[80];
+	char name[30];
 	//sprintf(name, "id: %ld, priority: %d; %f", packet->getId(), random, triggerTime);
-	sprintf(name, "id: %ld, priority: %d; > %lf", packet->getId(), priority,
+	sprintf(name, "priority: %d; > %lf", priority,
 			creationTime.dbl());
-	name[79] = '\0';
+	name[29] = '\0';
+	WRPacket *packet = new WRPacket(name);
+	    packet->setPriority(priority);
+	    packet->setByteLength(size);
 	packet->setName(name);	// set proper name
 	//std::cout << "packet (id: " << packet->getId() << ") priority set to: " << priority << " size " << size << std::endl;
 
