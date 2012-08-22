@@ -955,9 +955,9 @@ void Sink::writeNumbers2TexFile(string filename) {
 			Useful::getInstance()->appendToFile(filename, str);
 			str = "";
 			str += "%<*NumPacketsHP75maxSPmax1>";
+			sprintf(buf,"%d", _source->getSent().at(1));
 			buf[19] = '\0';
 			str += buf;
-			sprintf(buf,"%d", _source->getSent().at(1));
 			str += "%</NumPacketsHP75maxSPmax1>";
 			Useful::getInstance()->appendToFile(filename, str);
 			str = "";
@@ -1098,9 +1098,9 @@ void Sink::writeNumbers2TexFile(string filename) {
 			Useful::getInstance()->appendToFile(filename, str);
 			str="";
 			str += "%<*NumPacketsHP25maxSPmax6>";
+			sprintf(buf,"%d", _source->getSent().at(6));
 			buf[19] = '\0';
 			str += buf;
-			sprintf(buf,"%d", _source->getSent().at(6));
 			str += "%</NumPacketsHP25maxSPmax6>";
 			Useful::getInstance()->appendToFile(filename, str);
 			str = "";

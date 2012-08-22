@@ -197,10 +197,12 @@ void Scheduler::handleMessage(cMessage *msg) {
 			break;
 
 		case ALG_RR: // K=8, K=3
-#if 1
+#if 0
 			if (_rrCounter < 0)	// reset
 				_rrCounter = _nofCoS-1;
+
 			queueIndex = _rrCounter;
+
 			_rrCounter--;
 #else
 			/*maciej lipinski, cern, email 10.01.2012
@@ -212,27 +214,18 @@ void Scheduler::handleMessage(cMessage *msg) {
 			6.      else
 			7.          priority-- }*/
 
-
 			// FIXME RR should be better if the queue length is considered during selection
-			//if (_priorityCounter < 0)
-				//_priorityCounter = _nofCoS-1;
-			//if( _priorityCounter<0 )	// reset
-			//	_priorityCounter = _nofCoS-1;
 
-			_priorityCounter = _nofCoS-1;
+			queueIndex=-1;
 			// go through queues until you find a packet
-			while(_priorityCounter>0) {
-				if( getQueue(_priorityCounter)->length()>0 ) {
-					queueIndex=_priorityCounter;
-					break;
-				} else {
-					_priorityCounter--;
+			for( int index = _nofCoS-1; index>0; index-- ) {
+				if( getQueue(index)->length()>0 ) {
+					queueIndex = index;
 				}
-				if (_priorityCounter < 0) {	// reset + break
-					_priorityCounter = _nofCoS-1;
+				if(queueIndex!=-1)
 					break;
-				}
 			}
+
 			//queueIndex = _priorityCounter;
 #endif
 			//cout << "priority chosen: " << queueIndex << endl;
