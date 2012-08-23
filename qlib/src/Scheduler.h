@@ -55,23 +55,18 @@ class QUEUEING_API Scheduler : public cSimpleModule
 
         cMessage *triggerServiceMsg;	// receive trigger messages
 
-        int _nofCoS;	// default: 7..0
-        IPassiveQueue *_q7;	// reference to priority queue 7
-        IPassiveQueue *_q2;	// reference to priority queue 2
+        int _nofCoS;	// K=8 / K=3
 
-        // pointer to other queues
-        std::vector<IPassiveQueue*> _qs;
-
-        void determineQueueSizes();	// print queue's capacities
-
-        map<int, int> _mapQSizes;	// length, queue index
-
-		simtime_t _ifg;	// Time for the Interframe Gap
+        // PRIO
+        int Priority();
 
 		// RR / WRR
+        int RoundRobin();
 		int _rrCounter;         // counter for round robin scheduling
 
         // WFQ
+		int WeightedFairQueuingRR();
+		int WeightedFairQueuingHP();
 		int wfq_weight[8];	// only 0..3 are used for _nofCoS=3
 		int wfq_counter[8];	// only 0..3 are used for _nofCoS=3
 
@@ -84,19 +79,32 @@ class QUEUEING_API Scheduler : public cSimpleModule
         int _weight1;
         int _weight0;
 
-        int _counter7;
+        // WRR
+        int WeightedRoundRobin();
+        int sumWeights(int weight[], int size);
+        int calculateMaxWeight(int weight[], int asize);
+        int calculateHighestCommonDivisor(int weight[], int asize);
+        int queue_credit[8];	// only 0..3 are used for _nofCoS=3
+    	int credit_counter[8];	// only 0..3 are used for _nofCoS=3
+    	int weight[8];	// only 0..3 are used for _nofCoS=3
 
+    	int _ifgBytes;	// Interframe Gap
+		simtime_t _ifg;	// Time for the Interframe Gap
 
-        int _counter6;	// TODO still in use?
-        int _counter5;
-        int _counter4;
+        // FQSW
+		int FairQueueSizebasedWeighting();
+    	// calculate queue credits dynamically, return queue index if queue has enough credit
+        int determineQIndex(map<int, int>::iterator mit, int priority);
+        set<int> _highestIndex;
+        void determineQueueSizes();	// print queue's capacities
+        map<int, int> _mapQSizes;	// length, queue index
 
-        int _counter2;
-        int _counter1;
-        int _counter0;
-
+        // LQF+
+        int LongestQueueFirstPlus();
+        int findMaxQLengthIndex( int queuelengths[] );
 
         // FCFS
+        int FirstComeFirstServed();
         string getQueueName(int index);
         map<double,int> _mapPacketAges;
 
@@ -105,23 +113,6 @@ class QUEUEING_API Scheduler : public cSimpleModule
 				return false;
 			return true;
 		}
-
-        // WRR
-        int sumWeights(int weight[], int size);
-        int calculateMaxWeight(int weight[], int asize);
-        int calculateHighestCommonDivisor(int weight[], int asize);
-        int queue_credit[8];	// only 0..3 are used for _nofCoS=3
-    	int credit_counter[8];	// only 0..3 are used for _nofCoS=3
-    	int weight[8];	// only 0..3 are used for _nofCoS=3
-    	int _ifgBytes;	// Interframe Gap
-
-        // FQSW
-    	// calculate queue credits dynamically, return queue index if queue has enough credit
-        int determineQIndex(map<int, int>::iterator mit, int priority);
-        set<int> _highestIndex;
-
-        // LQF+
-        int findMaxQLengthIndex( int queuelengths[] );
 
     protected:
         virtual void initialize();
