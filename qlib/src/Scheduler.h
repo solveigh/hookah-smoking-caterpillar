@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <set>
+#include <algorithm>
 
 using std::cout;
 using std::endl;
@@ -28,12 +29,11 @@ namespace qlib {
 
 // routing algorithms
 enum alg {
+	 ALG_PRIO,
 	 ALG_RR,
-     ALG_SQF,
-     ALG_LQF,
+     ALG_LQFP,
      ALG_WFQ_RR,
      ALG_WFQ_HP,
-     ALG_FCFS,
      ALG_WRR,
      ALG_FQSW
 };
@@ -119,6 +119,9 @@ class QUEUEING_API Scheduler : public cSimpleModule
     	// calculate queue credits dynamically, return queue index if queue has enough credit
         int determineQIndex(map<int, int>::iterator mit, int priority);
         set<int> _highestIndex;
+
+        // LQF+
+        int findMaxQLengthIndex( int queuelengths[] );
 
     protected:
         virtual void initialize();

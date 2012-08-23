@@ -7,24 +7,21 @@ Define_Module(Scheduler);
 
 void Scheduler::initialize() {
 	const char *algName = par("routingAlgorithm");
-	if (strcmp(algName, "SQF") == 0) {
-		routingAlgorithm = ALG_SQF;
-		schedulingAlgorithm = "SQF";
-	} else if (strcmp(algName, "LQF") == 0) {
-		routingAlgorithm = ALG_LQF;
-		schedulingAlgorithm = "LQF";
+	if (strcmp(algName, "PRIO") == 0) {
+		routingAlgorithm = ALG_PRIO;
+		schedulingAlgorithm = "PRIO";
+	} else if (strcmp(algName, "RR") == 0) {
+		routingAlgorithm = ALG_RR;
+		schedulingAlgorithm = "RR";
+	} else if (strcmp(algName, "LQF+") == 0) {
+		routingAlgorithm = ALG_LQFP;
+		schedulingAlgorithm = "LQFP";
 	} else if (strcmp(algName, "WFQ_RR") == 0) {
 		routingAlgorithm = ALG_WFQ_RR;
 		schedulingAlgorithm = "WFQ_RR";
 	} else if (strcmp(algName, "WFQ_HP") == 0) {
 		routingAlgorithm = ALG_WFQ_HP;
 		schedulingAlgorithm = "WFQ_HP";
-	} else if (strcmp(algName, "RR") == 0) {
-		routingAlgorithm = ALG_RR;
-		schedulingAlgorithm = "RR";
-	} else if (strcmp(algName, "FCFS") == 0) {
-		routingAlgorithm = ALG_FCFS;
-		schedulingAlgorithm = "FCFS";
 	} else if (strcmp(algName, "WRR") == 0) {
 		routingAlgorithm = ALG_WRR;
 		schedulingAlgorithm = "WRR";
@@ -34,7 +31,7 @@ void Scheduler::initialize() {
 	}
 
 	_nofCoS = par("nofCoS");
-	cout << "Router nofCoS " << _nofCoS << endl;
+	cout << "Scheduler nofCoS " << _nofCoS << endl;
 
 	if( _nofCoS==8 ) {
 			_rrCounter = 7;
@@ -129,7 +126,7 @@ void Scheduler::initialize() {
 	// WRR
 	for (int i = 0; i < _nofCoS; i++) {
 		credit_counter[i] = 0;
-		queue_credit[i] = 0;
+		queue_credit[i] = 1000 * weight[i];
 	}
 
 	// WFQ
@@ -157,6 +154,7 @@ void Scheduler::handleMessage(cMessage *msg) {
 		// a trigger event arrived (either packet transmission finished or simulated cycle event)
 		switch (routingAlgorithm) {
 
+#if 0
 		case ALG_FCFS: // K=8, K=3
 			// check packets in all queues, chose oldest
 			_mapPacketAges.clear();
@@ -195,16 +193,8 @@ void Scheduler::handleMessage(cMessage *msg) {
 			//cout << "FCFS chosen " << queueIndex << endl;
 			//cout << "fcfs list size " << _fcfsQueueServeList.size() << " chosen " << queueIndex << endl;
 			break;
-
-		case ALG_RR: // K=8, K=3
-#if 0
-			if (_rrCounter < 0)	// reset
-				_rrCounter = _nofCoS-1;
-
-			queueIndex = _rrCounter;
-
-			_rrCounter--;
-#else
+#endif
+		case ALG_PRIO: // K=8, K=3
 			/*maciej lipinski, cern, email 10.01.2012
 			1. wait for the current package to be sent (regardless off the priority)
 			2. priority = 7
@@ -214,10 +204,8 @@ void Scheduler::handleMessage(cMessage *msg) {
 			6.      else
 			7.          priority-- }*/
 
-			// FIXME RR should be better if the queue length is considered during selection
-
 			queueIndex=-1;
-			// go through queues until you find a packet
+			// go through all priority queues until you find a packet
 			for( int index = _nofCoS-1; index>0; index-- ) {
 				if( getQueue(index)->length()>0 ) {
 					queueIndex = index;
@@ -226,14 +214,18 @@ void Scheduler::handleMessage(cMessage *msg) {
 					break;
 			}
 
-			//queueIndex = _priorityCounter;
-#endif
 			//cout << "priority chosen: " << queueIndex << endl;
 			break;
 
+		case ALG_RR: // K=8, K=3
+			if (_rrCounter < 0)	// reset
+				_rrCounter = _nofCoS-1;
+
+			queueIndex = _rrCounter;
+			_rrCounter--;
+
+			break;
 		case ALG_WRR: // K=8, K=3
-			// adjust priority queues credit to bandwidth (1 Gbps)
-			queue_credit[_rrCounter] = 1000000000 * weight[_rrCounter] / 1000000;
 
 			// consider priority queue only if it stores packets
 			if (getQueue(_rrCounter)->length() > 0) {
@@ -263,55 +255,36 @@ void Scheduler::handleMessage(cMessage *msg) {
 			}
 			//cout << "WRR chosen " << queueIndex << endl;
 			break;
-		case ALG_SQF:
-			if( _nofCoS==8 ) {
-				// highest priority is 7
-				if (_q7->length() > 0) {
-					queueIndex = 7;
+
+		case ALG_LQFP:	// K=8, K=3
+			// highest priority queue
+			if( getQueue(_nofCoS-1)->length()>0 ) {
+				queueIndex = _nofCoS-1;
+			} else {
+#if 1
+				// queues 6..0
+				int queuelengths[_nofCoS-1];
+
+				for( int i=_nofCoS-2; i>0; i-- ) {
+					queuelengths[i] = getQueue(i)->length();
+					//cout << "q " << i << " " << queuelengths[i] << endl;
 				}
-			} else if(_nofCoS==3) {
-				// highest priority is 2
-				if (_q2->length() > 0) {
-					queueIndex = 2;
-				}
+
+				// find queue with maximum length
+				queueIndex = findMaxQLengthIndex(queuelengths);
 			}
-			// sort the other priority queues only if the highest priority queues are empty
-			if( (queueIndex==-1) && (((_nofCoS==8)&&(_q7->length()==0)) || ((_nofCoS==3)&&(_q2->length()==0))) ) {
+
+#else
+				// sort the other priority queues only if the highest priority queues are empty
 				_mapQSizes.clear();
+
 				// sort queues in ascending order according to their length
 				for (it = _qs.begin(); it != _qs.end(); it++, i--) {
 					if ((*it)->length() > 0) {
 						_mapQSizes.insert(pair<int, int>((*it)->length(), i));
 					}
 				}
-				if (_mapQSizes.size() > 0) {
-					queueIndex = _mapQSizes.begin()->second; // shortest queue will be in the beginning
-				} else
-					queueIndex = -1;
-			}
-			//cout << "minQLength chosen: " << queueIndex << endl;
-			break;
-		case ALG_LQF:
-			if( _nofCoS==8 ) {
-				// highest priority
-				if (_q7->length() > 0) {
-					queueIndex = 7;
-				}
-			} else if(_nofCoS==3) {
-				// highest priority
-				if (_q2->length() > 0) {
-					queueIndex = 2;
-				}
-			}
-			// sort the other priority queues only if the highest priority queues are empty
-			if( (queueIndex==-1) && ( ((_nofCoS==8)&&(_q7->length()==0)) || ((_nofCoS==3)&&(_q2->length()==0))) ) {
-				_mapQSizes.clear();
-				// sort queues in ascending order according to their length
-				for (it = _qs.begin(); it != _qs.end(); it++, i--) {
-					if ((*it)->length() > 0) {
-						_mapQSizes.insert(pair<int, int>((*it)->length(), i));
-					}
-				}
+
 				if (_mapQSizes.size() > 0) {
 					mit = _mapQSizes.end(); // longest queue will be in the end
 					mit--;
@@ -320,7 +293,7 @@ void Scheduler::handleMessage(cMessage *msg) {
 					queueIndex = -1;
 				}
 			}
-			//cout << "maxQLength chosen: " << queueIndex << endl;
+#endif
 			break;
 		case ALG_WFQ_RR:
 
@@ -351,7 +324,7 @@ void Scheduler::handleMessage(cMessage *msg) {
 		case ALG_WFQ_HP:
 
 			// don't remember the last queue chosen since queues states may have changed,
-			// start again from highest priority (no RR)
+			// start again from highest priority (similar to Priority)
 			for( i=_nofCoS-1; i>-1; i-- ) {
 				if( wfq_counter[i] == wfq_weight[i] ) {
 					wfq_counter[i] = 0;
@@ -379,10 +352,16 @@ void Scheduler::handleMessage(cMessage *msg) {
 			// maybe similar to DRR, credits according to bandwidth
 			// watch queue capacity, when getting too full assign higher weight
 
+#if 0
+			// try to re-implement in a simpler way
+#else
+
 			_mapQSizes.clear();
 			_highestIndex.clear();
 			// sort queues in ascending order according to their length
 			// shortest queue will be in the beginning, longest queue will be in the end
+
+
 			for (i = (_nofCoS-1); i > -1; i--) {
 				if (getQueue(i)->length() > 0) {
 					_mapQSizes.insert(pair<int, int>(i, getQueue(i)->length()));
@@ -406,6 +385,7 @@ void Scheduler::handleMessage(cMessage *msg) {
 			} else {
 				queueIndex = -1;
 			}
+#endif
 			break;
 		default:
 			queueIndex = -1;
@@ -450,6 +430,22 @@ void Scheduler::handleMessage(cMessage *msg) {
 		scheduleAt(ft+_ifg, triggerServiceMsg);
 	}
 } // handleMessage()
+
+int Scheduler::findMaxQLengthIndex( int queuelengths[] ) {
+	int queueIndex = 0;
+	int maxi = 0;
+
+	// find queue with maximum length
+	//for(int i = 0; i <= _nofCoS-2; i++) {
+	for(int i = _nofCoS-2; i > 0; i--) {
+		if( maxi < queuelengths[i] ) {
+			maxi = queuelengths[i];	// maximum length
+			queueIndex = i;			// index of queue with maximum length
+		}
+	}
+
+	return queueIndex;
+} // findMaxQLengthIndex()
 
 int Scheduler::determineQIndex(map<int, int>::iterator mit, int priority) {
 	int queueIndex = -1;
