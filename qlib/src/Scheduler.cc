@@ -243,7 +243,7 @@ int Scheduler::LongestQueueFirstPlus() {
 		// queues 6..0
 		int queuelengths[_nofCoS-1];
 
-		for( int i=_nofCoS-2; i>0; i-- ) {
+		for( int i=_nofCoS-2; i>=0; i-- ) {
 			queuelengths[i] = getQueue(i)->length();
 			//cout << "q " << i << " " << queuelengths[i] << endl;
 		}
@@ -453,13 +453,13 @@ int Scheduler::findMaxQLengthIndex( int queuelengths[] ) {
 
 	// find queue with maximum length
 	//for(int i = 0; i <= _nofCoS-2; i++) {
-	for(int i = _nofCoS-2; i > 0; i--) {
+	
+	for(int i = _nofCoS-2; i >= 0; i--) {
 		if( maxi < queuelengths[i] ) {
 			maxi = queuelengths[i];	// maximum length
 			queueIndex = i;			// index of queue with maximum length
 		}
 	}
-
 	return queueIndex;
 } // findMaxQLengthIndex()
 
