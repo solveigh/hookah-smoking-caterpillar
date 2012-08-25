@@ -12,7 +12,6 @@
 #include <map>
 #include <string>
 #include <set>
-#include <algorithm>
 
 using std::cout;
 using std::endl;
@@ -44,16 +43,16 @@ enum alg {
 class QUEUEING_API Scheduler : public cSimpleModule
 {
     private:
-	    string schedulingAlgorithm;
-        int routingAlgorithm;  // the algorithm we are using for scheduling
+	    string _schedulingAlgorithm;
+        int _routingAlgorithm;  // the algorithm that is used for scheduling
 
-        cDatarateChannel *channel;	// reference to the output channel
+        cDatarateChannel *_channel;	// reference to the output channel
         IPassiveQueue *getQueue(int index);
 
-        simtime_t startTime;	// start-time of the simulation
-        simtime_t serviceTime;	// emulate internal clock cycle of WRS
+        simtime_t _startTime;	// start-time of the simulation
+        simtime_t _serviceTime;	// emulate internal clock cycle of WRS
 
-        cMessage *triggerServiceMsg;	// receive trigger messages
+        cMessage *_triggerServiceMsg;	// receive trigger messages
 
         int _nofCoS;	// K=8 / K=3
 
@@ -67,26 +66,17 @@ class QUEUEING_API Scheduler : public cSimpleModule
         // WFQ
 		int WeightedFairQueuingRR();
 		int WeightedFairQueuingHP();
-		int wfq_weight[8];	// only 0..3 are used for _nofCoS=3
-		int wfq_counter[8];	// only 0..3 are used for _nofCoS=3
-
-        int _weight7;
-        int _weight6;
-        int _weight5;
-        int _weight4;
-        int _weight3;
-        int _weight2;
-        int _weight1;
-        int _weight0;
+		int _wfq_weight[8];	// only 0..3 are used for _nofCoS=3
+		int _wfq_counter[8];	// only 0..3 are used for _nofCoS=3
 
         // WRR
         int WeightedRoundRobin();
         int sumWeights(int weight[], int size);
         int calculateMaxWeight(int weight[], int asize);
         int calculateHighestCommonDivisor(int weight[], int asize);
-        int queue_credit[8];	// only 0..3 are used for _nofCoS=3
-    	int credit_counter[8];	// only 0..3 are used for _nofCoS=3
-    	int weight[8];	// only 0..3 are used for _nofCoS=3
+        int _queue_credit[8];	// only 0..3 are used for _nofCoS=3
+    	int _credit_counter[8];	// only 0..3 are used for _nofCoS=3
+    	int _weight[8];	// only 0..3 are used for _nofCoS=3
 
     	int _ifgBytes;	// Interframe Gap
 		simtime_t _ifg;	// Time for the Interframe Gap
@@ -120,7 +110,7 @@ class QUEUEING_API Scheduler : public cSimpleModule
 
     public:
         string getSchedulingAlgorithm() {
-        	return schedulingAlgorithm;
+        	return _schedulingAlgorithm;
         }
 };
 

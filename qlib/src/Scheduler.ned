@@ -21,15 +21,15 @@ simple Scheduler
     	int nofCoS = default(8);	// default: 7..0
     	
     	// N=8
-    	int weight7 = default(4);	// weight used by WFQ
-    	int weight6 = default(3);	// weight used by WFQ
-    	int weight5 = default(3);	// weight used by WFQ
-    	int weight4 = default(3);	// weight used by WFQ
-    	int weight3 = default(3);	// weight used by WFQ
+    	int wfq_weight7 = default(4);	// weight used by WFQ
+    	int wfq_weight6 = default(3);	// weight used by WFQ
+    	int wfq_weight5 = default(3);	// weight used by WFQ
+    	int wfq_weight4 = default(3);	// weight used by WFQ
+    	int wfq_weight3 = default(3);	// weight used by WFQ
     	// N=8 / N=3
-    	int weight2 = default(3);	// weight used by WFQ
-    	int weight1 = default(3);	// weight used by WFQ
-    	int weight0 = default(3);	// weight used by WFQ
+    	int wfq_weight2 = default(3);	// weight used by WFQ
+    	int wfq_weight1 = default(3);	// weight used by WFQ
+    	int wfq_weight0 = default(3);	// weight used by WFQ
 
     	// N=8
     	int wrr_weight7 = default(10);	// weight used by WRR

@@ -8,115 +8,88 @@ Define_Module(Scheduler);
 void Scheduler::initialize() {
 	const char *algName = par("routingAlgorithm");
 	if (strcmp(algName, "PRIO") == 0) {
-		routingAlgorithm = ALG_PRIO;
-		schedulingAlgorithm = "PRIO";
+		_routingAlgorithm = ALG_PRIO;
+		_schedulingAlgorithm = "PRIO";
 	} else if (strcmp(algName, "RR") == 0) {
-		routingAlgorithm = ALG_RR;
-		schedulingAlgorithm = "RR";
+		_routingAlgorithm = ALG_RR;
+		_schedulingAlgorithm = "RR";
 	} else if (strcmp(algName, "LQF+") == 0) {
-		routingAlgorithm = ALG_LQFP;
-		schedulingAlgorithm = "LQFP";
+		_routingAlgorithm = ALG_LQFP;
+		_schedulingAlgorithm = "LQFP";
 	} else if (strcmp(algName, "WFQ_RR") == 0) {
-		routingAlgorithm = ALG_WFQ_RR;
-		schedulingAlgorithm = "WFQ_RR";
+		_routingAlgorithm = ALG_WFQ_RR;
+		_schedulingAlgorithm = "WFQ_RR";
 	} else if (strcmp(algName, "WFQ_HP") == 0) {
-		routingAlgorithm = ALG_WFQ_HP;
-		schedulingAlgorithm = "WFQ_HP";
+		_routingAlgorithm = ALG_WFQ_HP;
+		_schedulingAlgorithm = "WFQ_HP";
 	} else if (strcmp(algName, "WRR") == 0) {
-		routingAlgorithm = ALG_WRR;
-		schedulingAlgorithm = "WRR";
+		_routingAlgorithm = ALG_WRR;
+		_schedulingAlgorithm = "WRR";
 	} else if (strcmp(algName, "FQSW") == 0) {
-		routingAlgorithm = ALG_FQSW;
-		schedulingAlgorithm = "FQSW";
+		_routingAlgorithm = ALG_FQSW;
+		_schedulingAlgorithm = "FQSW";
 	}
 
 	_nofCoS = par("nofCoS");
 	cout << "Scheduler nofCoS " << _nofCoS << endl;
 
 	if( _nofCoS==8 ) {
-			_rrCounter = 7;
+			_rrCounter = _nofCoS-1;
 
 			// WFQ
-			_weight7 = par("weight7");
-			_weight6 = par("weight6");
-			_weight5 = par("weight5");
-			_weight4 = par("weight4");
-			_weight3 = par("weight3");
-			_weight2 = par("weight2");
-			_weight1 = par("weight1");
-			_weight0 = par("weight0");
-			//_counter7 = 0;
-
-			wfq_weight[7] = _weight7;
-			wfq_weight[6] = _weight6;
-			wfq_weight[5] = _weight5;
-			wfq_weight[4] = _weight4;
-			wfq_weight[3] = _weight3;
-			wfq_weight[2] = _weight2;
-			wfq_weight[1] = _weight1;
-			wfq_weight[0] = _weight0;
+			_wfq_weight[7] = par("weight7");
+			_wfq_weight[6] = par("weight6");
+			_wfq_weight[5] = par("weight5");
+			_wfq_weight[4] = par("weight4");
+			_wfq_weight[3] = par("weight3");
+			_wfq_weight[2] = par("weight2");
+			_wfq_weight[1] = par("weight1");
+			_wfq_weight[0] = par("weight0");
 
 			// WRR
-#if 1
-			weight[7] = par("wrr_weight7");
-			weight[6] = par("wrr_weight6");
-			weight[5] = par("wrr_weight5");
-			weight[4] = par("wrr_weight4");
-			weight[3] = par("wrr_weight3");
-			weight[2] = par("wrr_weight2");
-			weight[1] = par("wrr_weight1");
-			weight[0] = par("wrr_weight0");
-
-#else
-			weight[7] = _weight7;	// TODO lower weights may not get 0!!!
-			weight[6] = _weight7 - 1;
-			weight[5] = _weight7 - 2;
-			weight[4] = _weight7 - 2;
-			weight[3] = _weight7 - 3;
-			weight[2] = _weight7 - 3;
-			weight[1] = _weight7 - 3;
-			weight[0] = _weight7 - 4;
-#endif
+			_weight[7] = par("wrr_weight7");
+			_weight[6] = par("wrr_weight6");
+			_weight[5] = par("wrr_weight5");
+			_weight[4] = par("wrr_weight4");
+			_weight[3] = par("wrr_weight3");
+			_weight[2] = par("wrr_weight2");
+			_weight[1] = par("wrr_weight1");
+			_weight[0] = par("wrr_weight0");
 
 	} else if( _nofCoS==3 ) {
-		_rrCounter = 2;
+		_rrCounter = _nofCoS-1;
 
 		// WFQ
-		_weight2 = par("weight2");
-		_weight1 = par("weight1");
-		_weight0 = par("weight0");
-
-		wfq_weight[2] = _weight2;
-		wfq_weight[1] = _weight1;
-		wfq_weight[0] = _weight0;
+		_wfq_weight[2] = par("weight2");
+		_wfq_weight[1] = par("weight1");
+		_wfq_weight[0] = par("weight0");
 
 		// WRR
-		_weight7 = par("weight7");
-		weight[2] = _weight7 - 3;
-		weight[1] = _weight7 - 3;
-		weight[0] = _weight7 - 4;
+		_weight[2] = par("wrr_weight2");
+		_weight[1] = par("wrr_weight1");
+		_weight[0] = par("wrr_weight0");
 	} // if( _nofCoS==3 )
 
 	cGate* outputgate = gate("pppg");
-	channel = check_and_cast<cDatarateChannel *>(
+	_channel = check_and_cast<cDatarateChannel *>(
 			outputgate->getTransmissionChannel());
 
-	serviceTime = par("serviceTime");
-	startTime = par("startTime");
+	_serviceTime = par("serviceTime");
+	_startTime = par("startTime");
 
 	// trigger first scheduling operation
-	triggerServiceMsg = new cMessage("triggerServiceMessage");
-	scheduleAt(startTime, triggerServiceMsg);
+	_triggerServiceMsg = new cMessage("triggerServiceMessage");
+	scheduleAt(_startTime, _triggerServiceMsg);
 
 	// WRR
 	for (int i = 0; i < _nofCoS; i++) {
-		credit_counter[i] = 0;
-		queue_credit[i] = 1000 * weight[i];
+		_credit_counter[i] = 0;
+		_queue_credit[i] = 1000 * _weight[i];
 	}
 
 	// WFQ
 	for (int i = 0; i < _nofCoS; i++) {
-		wfq_counter[i] = 0;
+		_wfq_counter[i] = 0;
 	}
 
 	_ifg = par("ifg");
@@ -126,9 +99,9 @@ void Scheduler::initialize() {
 void Scheduler::handleMessage(cMessage *msg) {
 	int queueIndex = -1; // by default we drop the packet
 
-	if (msg == triggerServiceMsg) {
+	if (msg == _triggerServiceMsg) {
 		// a trigger event arrived (either packet transmission finished or simulated cycle event)
-		switch (routingAlgorithm) {
+		switch (_routingAlgorithm) {
 
 #if 0
 		case ALG_FCFS: // K=8, K=3
@@ -168,15 +141,15 @@ void Scheduler::handleMessage(cMessage *msg) {
 				if (q->length() > 0) {
 					q->request(0);
 				}
-				cancelEvent(triggerServiceMsg);
+				cancelEvent(_triggerServiceMsg);
 
 				// request finished, schedule next trigger event
-				triggerServiceMsg->setTimestamp();
-				scheduleAt(simTime() + serviceTime, triggerServiceMsg);
+				_triggerServiceMsg->setTimestamp();
+				scheduleAt(simTime() + _serviceTime, _triggerServiceMsg);
 			}
 		} else {
-			cancelEvent(triggerServiceMsg);
-			scheduleAt(simTime() + serviceTime, triggerServiceMsg);
+			cancelEvent(_triggerServiceMsg);
+			scheduleAt(simTime() + _serviceTime, _triggerServiceMsg);
 		}
 	} else {
 		// a requested packet arrived
@@ -186,17 +159,17 @@ void Scheduler::handleMessage(cMessage *msg) {
 		//cout << simTime() << " " << p->getArrivalTime() << " " << triggerServiceMsg->getArrivalTime() << " " << triggerServiceMsg->getSendingTime() << endl;
 		p->setTotalServiceTime(
 				p->getTotalServiceTime()
-						+ (triggerServiceMsg->getArrivalTime()
-								- triggerServiceMsg->getSendingTime()));
+						+ (_triggerServiceMsg->getArrivalTime()
+								- _triggerServiceMsg->getSendingTime()));
 		send(p, "pppg");
 
 		// cancel and re-schedule
-		cancelEvent(triggerServiceMsg);
+		cancelEvent(_triggerServiceMsg);
 
 		// Notify ourselves the moment the transmission line finishes transmitting the packet to choose (schedule) the next one.
 		simtime_t ft =
 				gate("pppg")->getTransmissionChannel()->getTransmissionFinishTime();
-		scheduleAt(ft+_ifg, triggerServiceMsg);
+		scheduleAt(ft+_ifg, _triggerServiceMsg);
 	}
 } // handleMessage()
 
@@ -279,27 +252,27 @@ int Scheduler::WeightedRoundRobin() {
 	int queueIndex = -1;
 	// consider priority queue only if it stores packets
 	if (getQueue(_rrCounter)->length() > 0) {
-		if (credit_counter[_rrCounter] == 0)
-			credit_counter[_rrCounter] = queue_credit[_rrCounter];
+		if (_credit_counter[_rrCounter] == 0)
+			_credit_counter[_rrCounter] = _queue_credit[_rrCounter];
 		int packet_size = getQueue(_rrCounter)->front()->getByteLength();
 		//cout << "_rrCounter: " << _rrCounter << " psize " << packet_size << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
-		if ((packet_size + _ifg) <= credit_counter[_rrCounter]) {
+		if ((packet_size + _ifg) <= _credit_counter[_rrCounter]) {
 			// if queue's credit is still available
 			queueIndex = _rrCounter;
-			credit_counter[_rrCounter] -= packet_size + _ifgBytes;
+			_credit_counter[_rrCounter] -= packet_size + _ifgBytes;
 			//cout << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
-			if (credit_counter[_rrCounter] == 0) {
+			if (_credit_counter[_rrCounter] == 0) {
 				_rrCounter = (_rrCounter + 1) % _nofCoS;
 			}
 			return queueIndex;
 		} else {
 			// give more credit to a queue if needed
-			credit_counter[_rrCounter] += queue_credit[_rrCounter];
+			_credit_counter[_rrCounter] += _queue_credit[_rrCounter];
 			_rrCounter = (_rrCounter + 1) % _nofCoS;
 		}
 	} else {
 		// reset credit counter
-		credit_counter[_rrCounter] = 0;
+		_credit_counter[_rrCounter] = 0;
 		// goto next priority queue
 		_rrCounter = (_rrCounter + 1) % _nofCoS;
 	}
@@ -310,21 +283,22 @@ int Scheduler::WeightedRoundRobin() {
 
 int Scheduler::WeightedFairQueuingRR() {
 	int queueIndex = -1;
+
 	// remember which priority queue was chosen last ->RR manner (closer to literature, kurose09)
 	if (_rrCounter < 0)	// reset
 		_rrCounter = _nofCoS-1;
 
-	if( wfq_counter[_rrCounter] == wfq_weight[_rrCounter] ) {	// reset queues counter
-		wfq_counter[_rrCounter] = 0;
+	if( _wfq_counter[_rrCounter] == _wfq_weight[_rrCounter] ) {	// reset queues counter
+		_wfq_counter[_rrCounter] = 0;
 	}
-	if( wfq_counter[_rrCounter] < wfq_weight[_rrCounter] ) {
+	if( _wfq_counter[_rrCounter] < _wfq_weight[_rrCounter] ) {
 		if (getQueue(_rrCounter)->length() > 0) { // try up to wfq_weight[i] times
 			queueIndex = _rrCounter;
 			_rrCounter = queueIndex;
-			wfq_counter[_rrCounter]++;
+			_wfq_counter[_rrCounter]++;
 		} else {
 			queueIndex = -1;
-			wfq_counter[_rrCounter]++;
+			_wfq_counter[_rrCounter]++;
 			_rrCounter--;
 		}
 		//wfq_counter[_rrCounter]++;
@@ -333,24 +307,25 @@ int Scheduler::WeightedFairQueuingRR() {
 	}
 	//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
 	//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
+
 	return queueIndex;
 } // WeightedFairQueuingRR()
 
 int Scheduler::WeightedFairQueuingHP() {
 	int queueIndex = -1;
 	// don't remember the last queue chosen since queues states may have changed,
-	// start again from highest priority (similar to Priority)
+	// start again from highest priority (similar to Priority scheduling)
 	for(int i=_nofCoS-1; i>-1; i-- ) {
-		if( wfq_counter[i] == wfq_weight[i] ) {
-			wfq_counter[i] = 0;
+		if( _wfq_counter[i] == _wfq_weight[i] ) {
+			_wfq_counter[i] = 0;
 		}
-		if( wfq_counter[i] < wfq_weight[i] ) {
+		if( _wfq_counter[i] < _wfq_weight[i] ) {
 			if (getQueue(i)->length() > 0) { // try up to wfq_weight[i] times
 				queueIndex = i;
-				wfq_counter[i]++;
+				_wfq_counter[i]++;
 			} else {
 				queueIndex = -1;
-				wfq_counter[i]++;
+				_wfq_counter[i]++;
 			}
 
 			if( queueIndex!=-1)
@@ -452,8 +427,6 @@ int Scheduler::findMaxQLengthIndex( int queuelengths[] ) {
 	int maxi = 0;
 
 	// find queue with maximum length
-	//for(int i = 0; i <= _nofCoS-2; i++) {
-	
 	for(int i = _nofCoS-2; i >= 0; i--) {
 		if( maxi < queuelengths[i] ) {
 			maxi = queuelengths[i];	// maximum length
@@ -478,24 +451,24 @@ int Scheduler::determineQIndex(map<int, int>::iterator mit, int priority) {
 		priority_weight = 2;
 #endif
 
-	weight[priority] = priority_weight * (mit->second);
+	_weight[priority] = priority_weight * (mit->second);
 
 	// adjust to bandwidth of 1 Gbps
-	queue_credit[priority] = (1000 * weight[priority]);	// re-assign queue credit (is this a good idea to keep the old values? in the next cycle queue lengths will have changed)
+	_queue_credit[priority] = (1000 * _weight[priority]);	// re-assign queue credit (is this a good idea to keep the old values? in the next cycle queue lengths will have changed)
 	//cout << " queue_credit["<<priority<<"] " << queue_credit[priority] << " weight["<<priority<<"] " << weight[priority] << " credit_cnt " << credit_counter[priority] << endl;
 
-	if (credit_counter[priority] == 0)
-		credit_counter[priority] = queue_credit[priority];
+	if (_credit_counter[priority] == 0)
+		_credit_counter[priority] = _queue_credit[priority];
 	int packet_size = getQueue(priority)->front()->getByteLength();
-	credit_counter[priority] -= packet_size + _ifgBytes;
+	_credit_counter[priority] -= packet_size + _ifgBytes;
 
 	// select queue according to available queue credit
-	if ((packet_size + _ifg) <= credit_counter[priority]) {
+	if ((packet_size + _ifg) <= _credit_counter[priority]) {
 		queueIndex = priority;
-		credit_counter[priority] -= packet_size + _ifgBytes;
+		_credit_counter[priority] -= packet_size + _ifgBytes;
 	} else {
 		// give more credit
-		credit_counter[priority] += queue_credit[priority];
+		_credit_counter[priority] += _queue_credit[priority];
 		queueIndex = -1;
 	}
 	return queueIndex;
