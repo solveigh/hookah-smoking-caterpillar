@@ -68,6 +68,7 @@ class QUEUEING_API Scheduler : public cSimpleModule
 		int WeightedFairQueuingHP();
 		int _wfq_weight[8];	// only 0..3 are used for _nofCoS=3
 		int _wfq_counter[8];	// only 0..3 are used for _nofCoS=3
+		int findMaxInArray( int array[], int arraysize );
 
         // WRR
         int WeightedRoundRobin();

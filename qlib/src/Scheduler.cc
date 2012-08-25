@@ -34,35 +34,35 @@ void Scheduler::initialize() {
 	cout << "Scheduler nofCoS " << _nofCoS << endl;
 
 	if( _nofCoS==8 ) {
-			_rrCounter = _nofCoS-1;
+		_rrCounter = _nofCoS-1;
 
-			// WFQ
-			_wfq_weight[7] = par("weight7");
-			_wfq_weight[6] = par("weight6");
-			_wfq_weight[5] = par("weight5");
-			_wfq_weight[4] = par("weight4");
-			_wfq_weight[3] = par("weight3");
-			_wfq_weight[2] = par("weight2");
-			_wfq_weight[1] = par("weight1");
-			_wfq_weight[0] = par("weight0");
+		// WFQ
+		_wfq_weight[7] = par("wfq_weight7");
+		_wfq_weight[6] = par("wfq_weight6");
+		_wfq_weight[5] = par("wfq_weight5");
+		_wfq_weight[4] = par("wfq_weight4");
+		_wfq_weight[3] = par("wfq_weight3");
+		_wfq_weight[2] = par("wfq_weight2");
+		_wfq_weight[1] = par("wfq_weight1");
+		_wfq_weight[0] = par("wfq_weight0");
 
-			// WRR
-			_weight[7] = par("wrr_weight7");
-			_weight[6] = par("wrr_weight6");
-			_weight[5] = par("wrr_weight5");
-			_weight[4] = par("wrr_weight4");
-			_weight[3] = par("wrr_weight3");
-			_weight[2] = par("wrr_weight2");
-			_weight[1] = par("wrr_weight1");
-			_weight[0] = par("wrr_weight0");
+		// WRR
+		_weight[7] = par("wrr_weight7");
+		_weight[6] = par("wrr_weight6");
+		_weight[5] = par("wrr_weight5");
+		_weight[4] = par("wrr_weight4");
+		_weight[3] = par("wrr_weight3");
+		_weight[2] = par("wrr_weight2");
+		_weight[1] = par("wrr_weight1");
+		_weight[0] = par("wrr_weight0");
 
 	} else if( _nofCoS==3 ) {
 		_rrCounter = _nofCoS-1;
 
 		// WFQ
-		_wfq_weight[2] = par("weight2");
-		_wfq_weight[1] = par("weight1");
-		_wfq_weight[0] = par("weight0");
+		_wfq_weight[2] = par("wfq_weight2");
+		_wfq_weight[1] = par("wfq_weight1");
+		_wfq_weight[0] = par("wfq_weight0");
 
 		// WRR
 		_weight[2] = par("wrr_weight2");
@@ -313,6 +313,33 @@ int Scheduler::WeightedFairQueuingRR() {
 
 int Scheduler::WeightedFairQueuingHP() {
 	int queueIndex = -1;
+
+#if 1
+	int weights[_nofCoS];
+
+	// initialize weights array
+	for( int i=_nofCoS-1; i>=0; i-- ) {
+		weights[i] = 0;
+	}
+	double usedUp = 100.0;	// remember how much of 100% available bandwidth is used up
+
+	for( int i=_nofCoS-1; i>=0; i-- ) {
+		if( getQueue(i)->length()>0 ) {
+			// distribute weights equally among non-empty priority queues (100%)	-> bad results
+			//weights[i] = ceil(100.0/double(nonEmptyQueues));
+
+			// calculate actual weights used based on non-empty priority queues and maximum share of bandwidth
+			weights[i] = ceil( ((double(_wfq_weight[i]))/100.0)*usedUp );	// distribute weights according to max allowed percentage of bandwidth
+			//cout << i << ": confWeight " << _wfq_weight[i] << ", calcWeight " << weights[i] << " usedUp: " << usedUp << endl;
+			usedUp -= weights[i];
+		}
+	}
+
+	// find index of maximum weight in weights array
+	queueIndex = findMaxInArray(weights, _nofCoS);
+	//cout << "queueIndex: " << queueIndex << endl;
+
+#else
 	// don't remember the last queue chosen since queues states may have changed,
 	// start again from highest priority (similar to Priority scheduling)
 	for(int i=_nofCoS-1; i>-1; i-- ) {
@@ -332,6 +359,7 @@ int Scheduler::WeightedFairQueuingHP() {
 				break;
 		}
 	}
+#endif
 	//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
 	//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
 	return queueIndex;
@@ -473,6 +501,20 @@ int Scheduler::determineQIndex(map<int, int>::iterator mit, int priority) {
 	}
 	return queueIndex;
 } // determineQIndex()
+
+int Scheduler::findMaxInArray( int array[], int arraysize ) {
+	int index = 0;
+	int maxi = 0;
+
+	// find queue with maximum length
+	for(int i = 0; i < arraysize; i++) {
+		if( maxi < array[i] ) {
+			maxi = array[i];	// maximum length
+			index = i;			// index of queue with maximum length
+		}
+	}
+	return index;
+} // findMaxInArray()
 
 IPassiveQueue *Scheduler::getQueue(int index) {
 	std::string queue = "queue";
