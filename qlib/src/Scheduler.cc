@@ -284,6 +284,58 @@ int Scheduler::WeightedRoundRobin() {
 int Scheduler::WeightedFairQueuingRR() {
 	int queueIndex = -1;
 
+#if 1
+	if (_rrCounter < 0)	// reset
+		_rrCounter = _nofCoS-1;
+
+	// consider RR nature  -> leads to similar packet loss in highest priority class as RR!
+	int weights[_nofCoS];
+
+	// initialize weights array
+	for( int i=_nofCoS-1; i>=0; i-- ) {
+		weights[i] = 0;
+	}
+	double usedUp = 100.0;	// remember how much of 100% available bandwidth is used up
+
+	int nonEmptyQueues=0;
+	for( int i=_nofCoS-1; i>=0; i-- ) {
+		if( getQueue(i)->length()>0 ) {
+			// distribute weights equally among non-empty priority queues (100%)	-> bad results
+			//weights[i] = ceil(100.0/double(nonEmptyQueues));
+
+			// calculate actual weights used based on non-empty priority queues and maximum share of bandwidth
+			weights[i] = ceil( ((double(_wfq_weight[i]))/100.0)*usedUp );	// distribute weights according to max allowed percentage of bandwidth
+			//cout << i << ": confWeight " << _wfq_weight[i] << ", calcWeight " << weights[i] << " usedUp: " << usedUp << endl;
+			usedUp -= weights[i];
+		}
+	}
+
+	// find index of maximum weight in weights array
+	//queueIndex = findMaxInArray(weights, _nofCoS);
+
+	int index = 0;
+	int maxi = 0;
+
+	// find queue with maximum length, build list of indices to priority queues
+	for(int i = _nofCoS-1; i >=0 ; i--) {
+		if( maxi < weights[i] ) {
+			maxi = weights[i];	// maximum length
+			index = i;			// index of queue with maximum length
+		}
+		if( index==_rrCounter ) {
+			queueIndex = index;
+		}
+	}
+
+	_rrCounter--;
+
+	if( queueIndex!=-1)
+		return queueIndex;
+
+	//cout << "queueIndex: " << queueIndex << endl;
+
+#else
+
 	// remember which priority queue was chosen last ->RR manner (closer to literature, kurose09)
 	if (_rrCounter < 0)	// reset
 		_rrCounter = _nofCoS-1;
@@ -307,7 +359,7 @@ int Scheduler::WeightedFairQueuingRR() {
 	}
 	//cout << "wfq chosen: " << queueIndex << " wfq_counter[q] " << wfq_counter[queueIndex] << endl;
 	//cout << "wfq chosen: " << queueIndex << " counter7 " << _counter7 << endl;
-
+#endif
 	return queueIndex;
 } // WeightedFairQueuingRR()
 
@@ -315,6 +367,7 @@ int Scheduler::WeightedFairQueuingHP() {
 	int queueIndex = -1;
 
 #if 1
+	// leads to similar results as implementation below
 	int weights[_nofCoS];
 
 	// initialize weights array
