@@ -257,9 +257,9 @@ int Scheduler::WeightedRoundRobin() {
 		_rrCounter = _nofCoS-1;
 	}
 
-	if (getQueue(_rrCounter)->length() > 0) {
+	if (getQueue(_rrCounter)->length() > 0) {	// consider only non-empty queues
 		if (_credit_counter[_rrCounter] == 0)
-			_credit_counter[_rrCounter] = _queue_credit[_rrCounter];	// reset credit counter to allowed ratio
+			_credit_counter[_rrCounter] = _queue_credit[_rrCounter];	// restore credit counter to allowed ratio of bandwidth
 
 		int packet_size = getQueue(_rrCounter)->front()->getByteLength();	// packet size in bytes of oldest packet in queue
 
