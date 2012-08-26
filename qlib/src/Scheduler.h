@@ -78,6 +78,7 @@ class QUEUEING_API Scheduler : public cSimpleModule
         int _queue_credit[8];	// only 0..3 are used for _nofCoS=3
     	int _credit_counter[8];	// only 0..3 are used for _nofCoS=3
     	int _weight[8];	// only 0..3 are used for _nofCoS=3
+    	int _bandwidth;	// available bandwidth of the network
 
     	int _ifgBytes;	// Interframe Gap
 		simtime_t _ifg;	// Time for the Interframe Gap

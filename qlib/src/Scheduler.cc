@@ -82,9 +82,10 @@ void Scheduler::initialize() {
 	scheduleAt(_startTime, _triggerServiceMsg);
 
 	// WRR
+	_bandwidth = par("bandwidth");
 	for (int i = 0; i < _nofCoS; i++) {
 		_credit_counter[i] = 0;
-		_queue_credit[i] = 1000 * _weight[i];
+		_queue_credit[i] = ceil((double(_weight[i])/100.0 ) * _bandwidth);	// adjust configurable weight (in percent) to bandwidth
 	}
 
 	// WFQ
@@ -252,9 +253,9 @@ int Scheduler::WeightedRoundRobin() {
 	int queueIndex = -1;
 	// consider priority queue only if it stores packets
 
-	/*if( _rrCounter==0 ) {	// reset Round-Robin counter
+	if( _rrCounter<0 ) {	// reset Round-Robin counter
 		_rrCounter = _nofCoS-1;
-	}*/
+	}
 
 	if (getQueue(_rrCounter)->length() > 0) {
 		if (_credit_counter[_rrCounter] == 0)
@@ -270,26 +271,20 @@ int Scheduler::WeightedRoundRobin() {
 
 			//cout << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
 
-			if (_credit_counter[_rrCounter] == 0) {			// queue's allowed credit is reached, decrement rrCounter
-				_rrCounter = (_rrCounter + 1) % _nofCoS;
-				//_rrCounter--;
-				//_rrCounter = (_rrCounter -1) % _nofCoS;
+			if (_credit_counter[_rrCounter] == 0) {		// queue's allowed credit is reached, decrement rrCounter
+				_rrCounter--;
 			}
 			return queueIndex;
 		} else {
 			// give more credit to a queue if necessary
 			_credit_counter[_rrCounter] += _queue_credit[_rrCounter];
-			_rrCounter = (_rrCounter + 1) % _nofCoS;
-			//_rrCounter--;
-			//_rrCounter = (_rrCounter -1) % _nofCoS;
+			_rrCounter--;	// decrement rrCounter
 		}
 	} else {
 		// reset credit counter
 		_credit_counter[_rrCounter] = 0;
-		// goto next priority queue
-		_rrCounter = (_rrCounter + 1) % _nofCoS;
-		//_rrCounter--;
-		//_rrCounter = (_rrCounter -1) % _nofCoS;
+		// decrement rrCounter
+		_rrCounter--;
 	}
 	//cout << "WRR chosen " << queueIndex << endl;
 

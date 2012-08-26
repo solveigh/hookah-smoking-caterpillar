@@ -51,15 +51,15 @@ network WRS_K3
             @display("p=186,179");
         }
 
-        GbpsSink: Sink {
+        sink: Sink {
             @display("p=421,114");
         }
         scheduler: Scheduler {
             @display("p=322,114;b=35,39");
         }
     connections:
-        scheduler.pppg --> pppline --> GbpsSink.in;
-        source.saveBurstData --> GbpsSink.saveBurstData;
+        scheduler.pppg --> pppline --> sink.in;
+        source.saveBurstData --> sink.saveBurstData;
         
         source.pppg++ --> pppline --> queue0.in;
         source.pppg++ --> pppline --> queue1.in;

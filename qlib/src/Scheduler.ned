@@ -15,6 +15,8 @@ simple Scheduler
         string routingAlgorithm @enum("PRIO", "RR", "WRR", "LQF+", "WFQ_RR", "WFQ_HP", "FQSW") = default("PRIO");
         volatile int randomGateIndex = default(intuniform(0, sizeof(out)-1));    // the destination gate in case of random routing
         
+        int bandwidth = default(125000000);		// bandwidth in bytes (1Gbps = 125,000,000 bytes per second)
+        
         double startTime @unit(s) = default(0); // when the module sends out the first packet
         volatile double serviceTime @unit(s); // WRS cycle
         volatile double ifg @unit(s); 				// time for interframe gap
