@@ -195,7 +195,7 @@ int Scheduler::Priority() {
 
 	int queueIndex=-1;
 	// go through all priority queues until you find a packet
-	for( int index = _nofCoS-1; index>0; index-- ) {
+	for( int index = _nofCoS-1; index>=0; index-- ) {
 		if( getQueue(index)->length()>0 ) {
 			queueIndex = index;
 		}
