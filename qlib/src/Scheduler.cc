@@ -289,34 +289,44 @@ int Scheduler::WeightedFairQueuingRR() {
 		_rrCounter = _nofCoS-1;
 
 	// consider RR nature  -> leads to similar packet loss in highest priority class as RR!
-	int weights[_nofCoS];
+	int weights[_nofCoS];	// weights in percent
 
 	// initialize weights array
 	for( int i=_nofCoS-1; i>=0; i-- ) {
 		weights[i] = 0;
 	}
-	double usedUp = 100.0;	// remember how much of 100% available bandwidth is used up
 
-	int nonEmptyQueues=0;
+	double remainder= 100.0;	// remainder of 100% available bandwidth
+
+	/*int nonEmptyQueues=0;	// for alternative implementation
+	for( int i=_nofCoS-1; i>=0; i-- ) {
+		if( getQueue(i)->length()>0 ) {
+			nonEmptyQueues++;
+		}
+	}
+	cout << "nonEmptyQueues: " << nonEmptyQueues << endl;*/
+
 	for( int i=_nofCoS-1; i>=0; i-- ) {
 		if( getQueue(i)->length()>0 ) {
 			// distribute weights equally among non-empty priority queues (100%)	-> bad results
 			//weights[i] = ceil(100.0/double(nonEmptyQueues));
 
 			// calculate actual weights used based on non-empty priority queues and maximum share of bandwidth
-			weights[i] = ceil( ((double(_wfq_weight[i]))/100.0)*usedUp );	// distribute weights according to max allowed percentage of bandwidth
-			//cout << i << ": confWeight " << _wfq_weight[i] << ", calcWeight " << weights[i] << " usedUp: " << usedUp << endl;
-			usedUp -= weights[i];
+			//weights[i] = ceil( ((double(_wfq_weight[i]))/100.0)*usedUp );	// distribute weights according to max allowed percentage of bandwidth
+			//usedUp -= weights[i];
+
+			weights[i] = ceil((remainder / 100.0 ) * (double(_wfq_weight[i])));
+			remainder = remainder - weights[i];
+			//cout << "rrCounter: " << _rrCounter << " i: " << i << ": confWeight " << _wfq_weight[i] << ", calcWeight " << weights[i] << " remainder: " << remainder << endl;
 		}
 	}
 
 	// find index of maximum weight in weights array
-	//queueIndex = findMaxInArray(weights, _nofCoS);
 
 	int index = 0;
 	int maxi = 0;
 
-	// find queue with maximum length, build list of indices to priority queues
+	// find queue with maximum length, build list of indices to priority queues, correlate to _rrCounter
 	for(int i = _nofCoS-1; i >=0 ; i--) {
 		if( maxi < weights[i] ) {
 			maxi = weights[i];	// maximum length
