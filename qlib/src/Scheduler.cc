@@ -251,30 +251,45 @@ int Scheduler::LongestQueueFirstPlus() {
 int Scheduler::WeightedRoundRobin() {
 	int queueIndex = -1;
 	// consider priority queue only if it stores packets
+
+	/*if( _rrCounter==0 ) {	// reset Round-Robin counter
+		_rrCounter = _nofCoS-1;
+	}*/
+
 	if (getQueue(_rrCounter)->length() > 0) {
 		if (_credit_counter[_rrCounter] == 0)
-			_credit_counter[_rrCounter] = _queue_credit[_rrCounter];
-		int packet_size = getQueue(_rrCounter)->front()->getByteLength();
+			_credit_counter[_rrCounter] = _queue_credit[_rrCounter];	// reset credit counter to allowed ratio
+
+		int packet_size = getQueue(_rrCounter)->front()->getByteLength();	// packet size in bytes of oldest packet in queue
+
 		//cout << "_rrCounter: " << _rrCounter << " psize " << packet_size << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
-		if ((packet_size + _ifg) <= _credit_counter[_rrCounter]) {
-			// if queue's credit is still available
-			queueIndex = _rrCounter;
-			_credit_counter[_rrCounter] -= packet_size + _ifgBytes;
+
+		if( (packet_size + _ifg) <= _credit_counter[_rrCounter] ) {	// if queue's credit is available
+			queueIndex = _rrCounter;	// select this queue for next transmission
+			_credit_counter[_rrCounter] -= packet_size + _ifgBytes;	// decrement credit counter of this queue by the next removed packet's size
+
 			//cout << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
-			if (_credit_counter[_rrCounter] == 0) {
+
+			if (_credit_counter[_rrCounter] == 0) {			// queue's allowed credit is reached, decrement rrCounter
 				_rrCounter = (_rrCounter + 1) % _nofCoS;
+				//_rrCounter--;
+				//_rrCounter = (_rrCounter -1) % _nofCoS;
 			}
 			return queueIndex;
 		} else {
-			// give more credit to a queue if needed
+			// give more credit to a queue if necessary
 			_credit_counter[_rrCounter] += _queue_credit[_rrCounter];
 			_rrCounter = (_rrCounter + 1) % _nofCoS;
+			//_rrCounter--;
+			//_rrCounter = (_rrCounter -1) % _nofCoS;
 		}
 	} else {
 		// reset credit counter
 		_credit_counter[_rrCounter] = 0;
 		// goto next priority queue
 		_rrCounter = (_rrCounter + 1) % _nofCoS;
+		//_rrCounter--;
+		//_rrCounter = (_rrCounter -1) % _nofCoS;
 	}
 	//cout << "WRR chosen " << queueIndex << endl;
 

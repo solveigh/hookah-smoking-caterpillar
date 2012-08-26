@@ -129,6 +129,8 @@ class QUEUEING_API Sink : public cSimpleModule
 
 	void writeNumbers2TexFile(string filename);
 
+	double calculatePacketLoss( int priorityQueue );
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

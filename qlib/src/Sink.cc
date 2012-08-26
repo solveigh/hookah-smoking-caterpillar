@@ -228,6 +228,17 @@ void Sink::canFinish() {
 	}
 } // canFinish()
 
+double Sink::calculatePacketLoss( int priorityQueue ) {
+	double dropped=100.0;
+	dropped = (double(_qs.at(priorityQueue)->getDropped().size())/double(_source->getSent().at(priorityQueue)))*100.0;
+
+	int n = _qs.at(priorityQueue)->getDropped().size() + getQueue(priorityQueue)->length();
+	if( n == _source->getSent().at(priorityQueue) ) { // queue was never emptied
+		dropped = 100.0;
+	}
+	return dropped;
+} //calculatePacketLoss()
+
 void Sink::finish() {
 
 	//cout << __FILE__ << " received: " <<  numReceived << endl;
@@ -236,7 +247,7 @@ void Sink::finish() {
 	cout << this->getName() << ": CoS: " << _qs.size() << " " << _scheduler->getSchedulingAlgorithm() << " Scenario: " << _source->getInputDataFileName() << endl;
 
 	if(_nofCoS==8) {
-		std::cout << "p 0: avg " << avg_lifetime(v0) << " ns size " << v0.size() << " Q time: " << avg_lifetime(vq0) << " ns "<</*S time: " << avg_lifetime(vsch0) << " ns*/ " sent: " << _source->getSent().at(0) << " dropped " << _qs.at(0)->getDropped().size() << "( " << (double(_qs.at(0)->getDropped().size())/double(_source->getSent().at(0)))*100.0 << "%)" << std::endl;
+		std::cout << "p 0: avg " << avg_lifetime(v0) << " ns size " << v0.size() << " Q time: " << avg_lifetime(vq0) << " ns "<</*S time: " << avg_lifetime(vsch0) << " ns*/ " sent: " << _source->getSent().at(0) << " dropped " << _qs.at(0)->getDropped().size() << "( " << calculatePacketLoss(0) << "%)" << std::endl;
 		std::cout << "p 1: avg " << avg_lifetime(v1) << " ns size " << v1.size() << " Q time: " << avg_lifetime(vq1) << " ns "<</*S time: " << avg_lifetime(vsch1) << " ns*/ " sent: " << _source->getSent().at(1) << " dropped " << _qs.at(1)->getDropped().size() << "( " << (double(_qs.at(1)->getDropped().size())/double(_source->getSent().at(1)))*100.0 << "%)" << std::endl;
 		std::cout << "p 2: avg " << avg_lifetime(v2) << " ns size " << v2.size() << " Q time: " << avg_lifetime(vq2) << " ns "<</*S time: " << avg_lifetime(vsch2) << " ns*/ " sent: " << _source->getSent().at(2) << " dropped " << _qs.at(2)->getDropped().size() << "( " << (double(_qs.at(2)->getDropped().size())/double(_source->getSent().at(2)))*100.0 << "%)" << std::endl;
 		std::cout << "p 3: avg " << avg_lifetime(v3) << " ns size " << v3.size() << " Q time: " << avg_lifetime(vq3) << " ns "<</*S time: " << avg_lifetime(vsch3) << " ns*/ " sent: " << _source->getSent().at(3) << " dropped " << _qs.at(3)->getDropped().size() << "( " << (double(_qs.at(3)->getDropped().size())/double(_source->getSent().at(3)))*100.0 << "%)" << std::endl;

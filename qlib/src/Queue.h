@@ -34,18 +34,18 @@ class QUEUEING_API Queue : public cSimpleModule, public IPassiveQueue
 		simsignal_t queueLengthSignal;
 		simsignal_t queueingTimeSignal;
 
-        bool fifo;
-        int _capacity;
+        bool fifo;						// true: queue acts in FCFS mode
+        int _capacity;					// queue capacity (number of positions for memory addresses)
         int _size;
-        cQueue queue;
+        cQueue queue;					// the queue itself
 
         void queueLengthChanged();
 
-        void enqueue(cPacket* msg);
+        void enqueue(cPacket* msg);		// store packets in queue as long as capacities last
 
-        vector<WRPacket* > _dropped;
+        vector<WRPacket* > _dropped;	// keep track of dropped packets
 
-        cModule * scheduler;
+        cModule * scheduler;			// access to scheduler module
 
     protected:
         virtual void initialize();
@@ -55,16 +55,20 @@ class QUEUEING_API Queue : public cSimpleModule, public IPassiveQueue
     public:
         Queue();
         virtual ~Queue();
-        // The following methods are called from IServer:
-        virtual int length();
-        virtual int size();
-        virtual void request(int gateIndex);
 
-        WRPacket * front();
+        // The following three methods are called from IServer:
+        virtual int length();					// queue length (number of packets)
+        virtual int size();						// queue length (amount of packet sizes in bytes)
+        virtual void request(int gateIndex);	// request a packet from the queue
+
+
+        WRPacket * front();						// pointer to oldest packet in queue
 
         cQueue getQueue() { return queue; };
 
         vector<WRPacket* > getDropped() {return _dropped;};
+
+        int getCapacity () { return _capacity; };
 };
 
 }; //namespace
