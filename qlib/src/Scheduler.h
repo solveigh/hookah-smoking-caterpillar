@@ -54,7 +54,7 @@ class QUEUEING_API Scheduler : public cSimpleModule
 
         cMessage *_triggerServiceMsg;	// receive trigger messages
 
-        int _nofCoS;	// K=8 / K=3
+        int _nofPriorityClasses;	// K=8 / K=3
 
         // PRIO
         int Priority();

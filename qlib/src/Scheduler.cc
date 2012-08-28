@@ -30,11 +30,11 @@ void Scheduler::initialize() {
 		_schedulingAlgorithm = "FQSW";
 	}
 
-	_nofCoS = par("nofCoS");
-	cout << "Scheduler nofCoS " << _nofCoS << endl;
+	_nofPriorityClasses = par("nofCoS");
+	cout << "Scheduler nofCoS " << _nofPriorityClasses << endl;
 
-	if( _nofCoS==8 ) {
-		_rrCounter = _nofCoS-1;
+	if( _nofPriorityClasses==8 ) {
+		_rrCounter = _nofPriorityClasses-1;
 
 		// WFQ
 		_wfq_weight[7] = par("wfq_weight7");
@@ -56,8 +56,8 @@ void Scheduler::initialize() {
 		_weight[1] = par("wrr_weight1");
 		_weight[0] = par("wrr_weight0");
 
-	} else if( _nofCoS==3 ) {
-		_rrCounter = _nofCoS-1;
+	} else if( _nofPriorityClasses==3 ) {
+		_rrCounter = _nofPriorityClasses-1;
 
 		// WFQ
 		_wfq_weight[2] = par("wfq_weight2");
@@ -83,13 +83,13 @@ void Scheduler::initialize() {
 
 	// WRR
 	_bandwidth = par("bandwidth");
-	for (int i = 0; i < _nofCoS; i++) {
+	for (int i = 0; i < _nofPriorityClasses; i++) {
 		_credit_counter[i] = 0;
 		_queue_credit[i] = ceil((double(_weight[i])/100.0 ) * _bandwidth);	// adjust configurable weight (in percent) to bandwidth
 	}
 
 	// WFQ
-	for (int i = 0; i < _nofCoS; i++) {
+	for (int i = 0; i < _nofPriorityClasses; i++) {
 		_wfq_counter[i] = 0;
 	}
 
@@ -175,12 +175,33 @@ void Scheduler::handleMessage(cMessage *msg) {
 } // handleMessage()
 
 int Scheduler::RoundRobin() {
+
+#if 1
+	// work-conserving Round-Robin
 	if (_rrCounter < 0)	// reset
-		_rrCounter = _nofCoS-1;
+		_rrCounter = _nofPriorityClasses-1;
+
+	int queueIndex = -1;
+	for( int i=_rrCounter; i>=0; i-- ) {
+		if( getQueue(i)->length()>0 ) {
+			queueIndex = i;
+			_rrCounter = i;	// remember as start-point for next cycle
+			break;
+		} else {
+			_rrCounter--;
+		}
+	}
+
+	return queueIndex;
+#else
+	// non work-conserving Round-Robin
+	if (_rrCounter < 0)	// reset
+		_rrCounter = _nofPriorityClasses-1;
 
 	int queueIndex = _rrCounter;
 	_rrCounter--;
 	return queueIndex;
+#endif
 } // RoundRobin()
 
 int Scheduler::Priority() {
@@ -194,8 +215,9 @@ int Scheduler::Priority() {
 	7.          priority-- }*/
 
 	int queueIndex=-1;
-	// go through all priority queues until you find a packet
-	for( int index = _nofCoS-1; index>=0; index-- ) {
+	// go through all priority queues until you find a packet,
+	// start with highest priority
+	for( int index = _nofPriorityClasses-1; index>=0; index-- ) {
 		if( getQueue(index)->length()>0 ) {
 			queueIndex = index;
 		}
@@ -210,14 +232,14 @@ int Scheduler::Priority() {
 int Scheduler::LongestQueueFirstPlus() {
 	int queueIndex = -1;
 	// highest priority queue
-	if( getQueue(_nofCoS-1)->length()>0 ) {
-		queueIndex = _nofCoS-1;
+	if( getQueue(_nofPriorityClasses-1)->length()>0 ) {
+		queueIndex = _nofPriorityClasses-1;
 	} else {
 #if 1
 		// queues 6..0
-		int queuelengths[_nofCoS-1];
+		int queuelengths[_nofPriorityClasses-1];
 
-		for( int i=_nofCoS-2; i>=0; i-- ) {
+		for( int i=_nofPriorityClasses-2; i>=0; i-- ) {
 			queuelengths[i] = getQueue(i)->length();
 			//cout << "q " << i << " " << queuelengths[i] << endl;
 		}
@@ -233,11 +255,11 @@ int Scheduler::LongestQueueFirstPlus() {
 		// sort queues in ascending order according to their length
 		for (it = _qs.begin(); it != _qs.end(); it++, i--) {
 			if ((*it)->length() > 0) {
-				_mapQSizes.insert(pair<int, int>((*it)->length(), i));
+				_mapQSizes.insert(pair<int, int>((*it)->length(), i));	// key: queue length, value: index of priority queue
 			}
 		}
 
-		if (_mapQSizes.size() > 0) {
+		if (_mapQSizes.size() > 0) {	// non-empty queues were found
 			mit = _mapQSizes.end(); // longest queue will be in the end
 			mit--;
 			queueIndex = (*mit).second;
@@ -254,7 +276,7 @@ int Scheduler::WeightedRoundRobin() {
 	// consider priority queue only if it stores packets
 
 	if( _rrCounter<0 ) {	// reset Round-Robin counter
-		_rrCounter = _nofCoS-1;
+		_rrCounter = _nofPriorityClasses-1;
 	}
 
 	if (getQueue(_rrCounter)->length() > 0) {	// consider only non-empty queues
@@ -296,13 +318,15 @@ int Scheduler::WeightedFairQueuingRR() {
 
 #if 1
 	if (_rrCounter < 0)	// reset
-		_rrCounter = _nofCoS-1;
+		_rrCounter = _nofPriorityClasses-1;
 
 	// consider RR nature  -> leads to similar packet loss in highest priority class as RR!
-	int weights[_nofCoS];	// weights in percent
+
+
+	int weights[_nofPriorityClasses];	// weights in percent
 
 	// initialize weights array
-	for( int i=_nofCoS-1; i>=0; i-- ) {
+	for( int i=_nofPriorityClasses-1; i>=0; i-- ) {
 		weights[i] = 0;
 	}
 
@@ -316,7 +340,8 @@ int Scheduler::WeightedFairQueuingRR() {
 	}
 	cout << "nonEmptyQueues: " << nonEmptyQueues << endl;*/
 
-	for( int i=_nofCoS-1; i>=0; i-- ) {
+	// calculate actual weights used based on non-empty priority queues and maximum share of bandwidth
+	for( int i=_nofPriorityClasses-1; i>=0; i-- ) {
 		if( getQueue(i)->length()>0 ) {
 			// distribute weights equally among non-empty priority queues (100%)	-> bad results
 			//weights[i] = ceil(100.0/double(nonEmptyQueues));
@@ -337,20 +362,19 @@ int Scheduler::WeightedFairQueuingRR() {
 	int maxi = 0;
 
 	// find queue with maximum length, build list of indices to priority queues, correlate to _rrCounter
-	for(int i = _nofCoS-1; i >=0 ; i--) {
+	for(int i = _nofPriorityClasses-1; i >=0 ; i--) {
 		if( maxi < weights[i] ) {
 			maxi = weights[i];	// maximum length
 			index = i;			// index of queue with maximum length
 		}
-		if( index==_rrCounter ) {
+		if( index==_rrCounter ) {	// TODO how to consider RR nature?
 			queueIndex = index;
 		}
 	}
 
 	_rrCounter--;
 
-	if( queueIndex!=-1)
-		return queueIndex;
+	return queueIndex;
 
 	//cout << "queueIndex: " << queueIndex << endl;
 
@@ -358,7 +382,7 @@ int Scheduler::WeightedFairQueuingRR() {
 
 	// remember which priority queue was chosen last ->RR manner (closer to literature, kurose09)
 	if (_rrCounter < 0)	// reset
-		_rrCounter = _nofCoS-1;
+		_rrCounter = _nofPriorityClasses-1;
 
 	if( _wfq_counter[_rrCounter] == _wfq_weight[_rrCounter] ) {	// reset queues counter
 		_wfq_counter[_rrCounter] = 0;
@@ -388,15 +412,15 @@ int Scheduler::WeightedFairQueuingHP() {
 
 #if 1
 	// leads to similar results as implementation below
-	int weights[_nofCoS];
+	int weights[_nofPriorityClasses];
 
 	// initialize weights array
-	for( int i=_nofCoS-1; i>=0; i-- ) {
+	for( int i=_nofPriorityClasses-1; i>=0; i-- ) {
 		weights[i] = 0;
 	}
 	double usedUp = 100.0;	// remember how much of 100% available bandwidth is used up
 
-	for( int i=_nofCoS-1; i>=0; i-- ) {
+	for( int i=_nofPriorityClasses-1; i>=0; i-- ) {
 		if( getQueue(i)->length()>0 ) {
 			// distribute weights equally among non-empty priority queues (100%)	-> bad results
 			//weights[i] = ceil(100.0/double(nonEmptyQueues));
@@ -409,13 +433,13 @@ int Scheduler::WeightedFairQueuingHP() {
 	}
 
 	// find index of maximum weight in weights array
-	queueIndex = findMaxInArray(weights, _nofCoS);
+	queueIndex = findMaxInArray(weights, _nofPriorityClasses);
 	//cout << "queueIndex: " << queueIndex << endl;
 
 #else
 	// don't remember the last queue chosen since queues states may have changed,
 	// start again from highest priority (similar to Priority scheduling)
-	for(int i=_nofCoS-1; i>-1; i-- ) {
+	for(int i=_nofPriorityClasses-1; i>-1; i-- ) {
 		if( _wfq_counter[i] == _wfq_weight[i] ) {
 			_wfq_counter[i] = 0;
 		}
@@ -454,7 +478,7 @@ int Scheduler::FairQueueSizebasedWeighting() {
 	// sort queues in ascending order according to their length
 	// shortest queue will be in the beginning, longest queue will be in the end
 
-	for (int i = (_nofCoS-1); i > -1; i--) {
+	for (int i = (_nofPriorityClasses-1); i > -1; i--) {
 		if (getQueue(i)->length() > 0) {
 			_mapQSizes.insert(pair<int, int>(i, getQueue(i)->length()));
 		}
@@ -487,7 +511,7 @@ int Scheduler::FirstComeFirstServed() {
 	string qname;
 	// check packets in all queues, chose oldest
 	_mapPacketAges.clear();
-	for(int k=(_nofCoS-1); k>-1; k--) {
+	for(int k=(_nofPriorityClasses-1); k>-1; k--) {
 		IPassiveQueue *q = getQueue(k);
 		if(q->length()>0){
 
@@ -524,11 +548,11 @@ int Scheduler::FirstComeFirstServed() {
 } // FirstComeFirstServed()
 
 int Scheduler::findMaxQLengthIndex( int queuelengths[] ) {
-	int queueIndex = 0;
+	int queueIndex = -1;
 	int maxi = 0;
 
 	// find queue with maximum length
-	for(int i = _nofCoS-2; i >= 0; i--) {
+	for(int i = _nofPriorityClasses-2; i >= 0; i--) {
 		if( maxi < queuelengths[i] ) {
 			maxi = queuelengths[i];	// maximum length
 			queueIndex = i;			// index of queue with maximum length
@@ -548,7 +572,7 @@ int Scheduler::determineQIndex(map<int, int>::iterator mit, int priority) {
 
 #if 0
 	// allow a minimum to prevent high queuing times for K=8
-	if( (_nofCoS==8) && (priority>3) )
+	if( (_nofPriorityClasses==8) && (priority>3) )
 		priority_weight = 2;
 #endif
 
@@ -615,7 +639,7 @@ string Scheduler::getQueueName(int index) {
 
 void Scheduler::determineQueueSizes() {
 
-	for (int i = 0; i < (_nofCoS + 1); i++) {
+	for (int i = 0; i < (_nofPriorityClasses + 1); i++) {
 		IPassiveQueue *pqueue = getQueue(i);
 		if (pqueue != NULL)
 			std::cout << "queue " << i << " length " << pqueue->length()
