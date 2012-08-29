@@ -322,7 +322,6 @@ int Scheduler::WeightedFairQueuingRR() {
 
 	// consider RR nature  -> leads to similar packet loss in highest priority class as RR!
 
-
 	int weights[_nofPriorityClasses];	// weights in percent
 
 	// initialize weights array
@@ -332,45 +331,47 @@ int Scheduler::WeightedFairQueuingRR() {
 
 	double remainder= 100.0;	// remainder of 100% available bandwidth
 
-	/*int nonEmptyQueues=0;	// for alternative implementation
-	for( int i=_nofCoS-1; i>=0; i-- ) {
+	int nonEmptyQueues=0;	// for alternative implementation
+	for( int i=_nofPriorityClasses-1; i>=0; i-- ) {
 		if( getQueue(i)->length()>0 ) {
 			nonEmptyQueues++;
 		}
 	}
-	cout << "nonEmptyQueues: " << nonEmptyQueues << endl;*/
+	//cout << "nonEmptyQueues: " << nonEmptyQueues << endl;*/
 
 	// calculate actual weights used based on non-empty priority queues and maximum share of bandwidth
 	for( int i=_nofPriorityClasses-1; i>=0; i-- ) {
 		if( getQueue(i)->length()>0 ) {
 			// distribute weights equally among non-empty priority queues (100%)	-> bad results
 			//weights[i] = ceil(100.0/double(nonEmptyQueues));
+			weights[i] = ceil(_wfq_weight[i]/double(nonEmptyQueues));	// TODO check this
 
 			// calculate actual weights used based on non-empty priority queues and maximum share of bandwidth
 			//weights[i] = ceil( ((double(_wfq_weight[i]))/100.0)*usedUp );	// distribute weights according to max allowed percentage of bandwidth
 			//usedUp -= weights[i];
 
-			weights[i] = ceil((remainder / 100.0 ) * (double(_wfq_weight[i])));
-			remainder = remainder - weights[i];
+			//weights[i] = ceil((remainder / 100.0 ) * (double(_wfq_weight[i])));
+			//remainder = remainder - weights[i];
 			//cout << "rrCounter: " << _rrCounter << " i: " << i << ": confWeight " << _wfq_weight[i] << ", calcWeight " << weights[i] << " remainder: " << remainder << endl;
 		}
 	}
 
 	// find index of maximum weight in weights array
-
 	int index = 0;
 	int maxi = 0;
 
-	// find queue with maximum length, build list of indices to priority queues, correlate to _rrCounter
+	// find queue with maximum weight, build list of indices to priority queues, correlate to _rrCounter
 	for(int i = _nofPriorityClasses-1; i >=0 ; i--) {
 		if( maxi < weights[i] ) {
 			maxi = weights[i];	// maximum length
 			index = i;			// index of queue with maximum length
 		}
-		if( index==_rrCounter ) {	// TODO how to consider RR nature?
+		if( index==_rrCounter ) {	// TODO how to consider work-conserving RR nature?
 			queueIndex = index;
 		}
 	}
+
+	// TODO how to properly consider RR nature?
 
 	_rrCounter--;
 
