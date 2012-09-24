@@ -1,6 +1,6 @@
 /*
  * Useful.h
- *
+ *	// https://github.com/solveigh/hookah-smoking-caterpillar
  *  Created on: Feb 20, 2012
  *      Author: matthies
  */

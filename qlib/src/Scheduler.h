@@ -31,10 +31,9 @@ enum alg {
 	 ALG_PRIO,
 	 ALG_RR,
      ALG_LQFP,
-     ALG_WFQ_RR,
-     ALG_WFQ_HP,
-     ALG_WRR,
-     ALG_FQSW
+     ALG_DRRP,
+     ALG_WRQ,
+     ALG_WFQP
 };
 
 /**
@@ -59,37 +58,32 @@ class QUEUEING_API Scheduler : public cSimpleModule
         // PRIO
         int Priority();
 
-		// RR / WRR
+		// RR / DRR
         int RoundRobin();
-		int _rrCounter;         // counter for round robin scheduling
+		int _rrIndex;         // counter for round robin scheduling
 
-        // WFQ
-		int WeightedFairQueuingRR();
-		int WeightedFairQueuingHP();
-		int _wfq_weight[8];	// only 0..3 are used for _nofCoS=3
-		int _wfq_counter[8];	// only 0..3 are used for _nofCoS=3
-		int findMaxInArray( int array[], int arraysize );
+        // WRQ
+		int WeightedRandomQueuing();
+		int _wrq_weight[8];	// only 0..3 are used for N=3
 
-        // WRR
-        int WeightedRoundRobin();
-        int sumWeights(int weight[], int size);
-        int calculateMaxWeight(int weight[], int asize);
-        int calculateHighestCommonDivisor(int weight[], int asize);
-        int _queue_credit[8];	// only 0..3 are used for _nofCoS=3
-    	int _credit_counter[8];	// only 0..3 are used for _nofCoS=3
-    	int _weight[8];	// only 0..3 are used for _nofCoS=3
+		// WFQ
+		int WeightedFairQueuingPlus();
+		int _wfq_weight[8];	// only 0..3 are used for N=3
+		int _wfq_credit[8];	// only 0..3 are used for N=3
+		int _wfq_counter[8]; // only 0..3 are used for N=3
+
+        // DRRP
+        int DeficitRoundRobinPlus();
+        //int sumWeights(int weight[], int size);
+        //int calculateMaxWeight(int weight[], int asize);
+        //int calculateHighestCommonDivisor(int weight[], int asize);
+        int _queue_credit[8];	// only 0..3 are used for N=3
+    	int _credit_counter[8];	// only 0..3 are used for N=3
+    	int _drr_weight[8];	// only 0..3 are used for N=3
     	int _bandwidth;	// available bandwidth of the network
 
     	int _ifgBytes;	// Interframe Gap
 		simtime_t _ifg;	// Time for the Interframe Gap
-
-        // FQSW
-		int FairQueueSizebasedWeighting();
-    	// calculate queue credits dynamically, return queue index if queue has enough credit
-        int determineQIndex(map<int, int>::iterator mit, int priority);
-        set<int> _highestIndex;
-        void determineQueueSizes();	// print queue's capacities
-        map<int, int> _mapQSizes;	// length, queue index
 
         // LQF+
         int LongestQueueFirstPlus();

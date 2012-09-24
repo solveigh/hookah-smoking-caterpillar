@@ -156,7 +156,6 @@ void Useful::appendToFile(std::string filename, int value) {
 } // appendToFile()
 
 bool Useful::testFirstLineOfFile(std::string filename, std::string value) {
-#ifdef __linux__
 	FILE* filehandle = fopen( filename.c_str(),"r" );
 	char buf[150];
 	bool returnvalue=false;
@@ -173,10 +172,7 @@ bool Useful::testFirstLineOfFile(std::string filename, std::string value) {
 		fclose(filehandle );
 	}
 	return returnvalue;
-#else
-	// windows: error: 'strcmp' was not declared in this scope
 	return false;
-#endif
 } // testFirstLineOfFile()
 
 // structure to group data
