@@ -78,8 +78,12 @@ void Scheduler::initialize() {
 	_bandwidth = par("bandwidth");
 	for (int i = 0; i < _nofPriorityClasses; i++) {
 		_credit_counter[i] = 0;
-		_queue_credit[i] = ceil((double(_drr_weight[i])/100.0 ) * _bandwidth) / 10000;	// adjust configurable weight (in percent) to bandwidth
+		// adjust weights in percent to available bandwidth
+		//_queue_credit[i] = ceil((double(_drr_weight[i])/100.0 ) * _bandwidth) / 10000;	// adjust configurable weight (in percent) to bandwidth
 		    // and reduce time of circulation by dividing with 10000
+
+		// weights in bytes
+		_queue_credit[i] = _drr_weight[i];
 	}
 
 	// WRQ
