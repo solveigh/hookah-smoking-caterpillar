@@ -74,9 +74,6 @@ class QUEUEING_API Scheduler : public cSimpleModule
 
         // DRRP
         int DeficitRoundRobinPlus();
-        //int sumWeights(int weight[], int size);
-        //int calculateMaxWeight(int weight[], int asize);
-        //int calculateHighestCommonDivisor(int weight[], int asize);
         int _queue_credit[8];	// only 0..3 are used for N=3
     	int _credit_counter[8];	// only 0..3 are used for N=3
     	int _drr_weight[8];	// only 0..3 are used for N=3
@@ -87,12 +84,6 @@ class QUEUEING_API Scheduler : public cSimpleModule
 
         // LQF+
         int LongestQueueFirstPlus();
-        int findMaxQLengthIndex( int queuelengths[] );
-
-        // FCFS
-        int FirstComeFirstServed();
-        string getQueueName(int index);
-        map<double,int> _mapPacketAges;
 
 		bool file_delete(std::string filename) {
 			if( unlink( filename.c_str() ) != 0)

@@ -176,6 +176,19 @@ void Scheduler::handleMessage(cMessage *msg) {
 	}
 } // handleMessage()
 
+int Scheduler::Priority() {
+	int queueIndex=-1;
+	// go through all priority queues until you find a packet,
+	// start with highest priority
+	for( int index = _nofPriorityClasses-1; index>=0; index-- ) {
+		if( getQueue(index)->length()>0 ) {
+			queueIndex = index;
+		}
+	}
+
+	return queueIndex;
+} // Priority()
+
 int Scheduler::RoundRobin() {
 
 #if 1
@@ -205,35 +218,10 @@ int Scheduler::RoundRobin() {
 #endif
 } // RoundRobin()
 
-int Scheduler::Priority() {
-	/*maciej lipinski, cern, email 10.01.2012
-	1. wait for the current package to be sent (regardless off the priority)
-	2. priority = 7
-	3. while (priority >= 0) {
-	4.      if (outputQueue[priority] is not empty )
-	5.          send frame from the queue of priority
-	6.      else
-	7.          priority-- }*/
-
-	int queueIndex=-1;
-	// go through all priority queues until you find a packet,
-	// start with highest priority
-	for( int index = _nofPriorityClasses-1; index>=0; index-- ) {
-		if( getQueue(index)->length()>0 ) {
-			queueIndex = index;
-		}
-		if(queueIndex!=-1)
-			break;
-	}
-
-	//cout << "priority chosen: " << queueIndex << endl;
-	return queueIndex;
-} // Priority()
-
 int Scheduler::LongestQueueFirstPlus() {
 	int queueIndex = -1;
-	// highest priority queue
-	if( getQueue(_nofPriorityClasses-1)->length()>0 ) {
+
+	if( getQueue(_nofPriorityClasses-1)->length()>0 ) {		// highest priority queue
 		queueIndex = _nofPriorityClasses-1;
 	} else {
 		int maxQLIndex = 0;
@@ -248,69 +236,9 @@ int Scheduler::LongestQueueFirstPlus() {
 	return queueIndex;
 } // LongestQueueFirstPlus()
 
-int Scheduler::WeightedFairQueuingPlus() {
-	int queueIndex = -1;
-
-
-#if 1
-    // work-conserving WFQ+
-    if( getQueue(_nofPriorityClasses-1)->length() > 0 ) {    // treat highest priority class separately
-        queueIndex = _nofPriorityClasses-1;
-    } else {    // treat standard priority queues fairly
-        if( _rrIndex<0 )    // reset Round-Robin counter
-            _rrIndex = _nofPriorityClasses-2;
-
-        //for( int i=_rrIndex; i>-1; i-- )
-        {
-            if( getQueue(_rrIndex)->length() > 0 ) {    // consider only non-empty queues
-                if (_wfq_counter[_rrIndex] == 0)
-                    _wfq_counter[_rrIndex] = _wfq_credit[_rrIndex];    // restore credit counter to allowed ratio of bandwidth
-
-                int queue_length = getQueue(_rrIndex)->length(); // packet size in bytes of oldest packet in queue
-
-                if( queue_length <= _wfq_counter[_rrIndex] ) {  // if queue's credit is available
-                    queueIndex = _rrIndex;  // select this queue for next transmission
-                    _wfq_counter[_rrIndex] -= 1;   // decrement credit counter of this queue by the next removed packet's size
-                } else {
-                    // give more credit to a queue if necessary
-                    _wfq_counter[_rrIndex] += _wfq_credit[_rrIndex];
-                    _rrIndex--; // decrement _rrIndex
-                }
-            } else {
-                _wfq_counter[_rrIndex] = 0;  // reset credit counter
-                _rrIndex--; // decrement _rrIndex
-            }
-        }
-    }
-#else
-	// work-conserving WFQ
-	for( int index=_nofPriorityClasses-1; index>-1; index-- ) {
-		if( getQueue(index)->length() > 0 ) {	// consider only non-empty queues
-			int qlength = getQueue(index)->length();	// queue length
-
-			if( _wfq_credit[index] == 0 ) {	// queue credit was reset
-				_wfq_credit[index] = _wfq_weight[index];	// restore credit counter to allowed ratio of bandwidth
-			}
-			if( _wfq_credit[index]>=1 ) {	// if queue's credit is available
-				queueIndex = index;	// select this queue for next transmission
-				_wfq_credit[index] -= 1;	// decrement credit counter of this queue by the next removed packet
-				break;	// non-empty queue found
-			} else {
-				// give more credit to a queue if necessary
-				_wfq_credit[index] += _wfq_weight[index];
-			}
-		} else {
-			_wfq_credit[index] = 0;	// reset queue credit to zero
-		}
-	}
-#endif
-	return queueIndex;
-}	// WeightedFairQueuingPlus()
-
 int Scheduler::DeficitRoundRobinPlus() {
 	int queueIndex = -1;
 
-#if 1
     // work-conserving DRR+
     if( getQueue(_nofPriorityClasses-1)->length() > 0 ) {    // treat highest priority class separately
         queueIndex = _nofPriorityClasses-1;
@@ -319,10 +247,10 @@ int Scheduler::DeficitRoundRobinPlus() {
             _rrIndex = _nofPriorityClasses-2;
 
         if( getQueue(_rrIndex)->length() > 0 ) {    // consider only non-empty queues
-            if (_credit_counter[_rrIndex] == 0)
-                _credit_counter[_rrIndex] = _queue_credit[_rrIndex];    // restore credit counter to allowed ratio of bandwidth
+            if( _credit_counter[_rrIndex]==0 )
+            	_credit_counter[_rrIndex] = _queue_credit[_rrIndex];    // restore credit counter to allowed quantum of bandwidth
 
-            int packet_size = getQueue(_rrIndex)->front()->getByteLength(); // packet size in bytes of oldest packet in queue
+        	int packet_size = getQueue(_rrIndex)->front()->getByteLength(); // packet size in bytes of oldest packet in queue
 
             if( (packet_size) <= _credit_counter[_rrIndex] ) {  // if queue's credit is available
                 queueIndex = _rrIndex;  // select this queue for next transmission
@@ -333,96 +261,46 @@ int Scheduler::DeficitRoundRobinPlus() {
                 _rrIndex--; // decrement _rrIndex
             }
         } else {
-            _credit_counter[_rrIndex] = 0;  // reset credit counter
+        	_credit_counter[_rrIndex] = 0;	// reset queue credit to 0
             _rrIndex--; // decrement _rrIndex
         }
     }
-#else
-    // work-conserving DRR
-    if( _rrIndex<0 )    // reset Round-Robin counter
-        _rrIndex = _nofPriorityClasses-1;
-
-    if( getQueue(_rrIndex)->length() > 0 ) {    // consider only non-empty queues
-        if (_credit_counter[_rrIndex] == 0)
-            _credit_counter[_rrIndex] = _queue_credit[_rrIndex];    // restore credit counter to allowed ratio of bandwidth
-
-        int packet_size = getQueue(_rrIndex)->front()->getByteLength(); // packet size in bytes of oldest packet in queue
-
-        //cout << "_rrIndex: " << _rrIndex << " psize " << packet_size << " creditcnt " << credit_counter[_rrIndex] << " " << queue_credit[_rrIndex] << endl;
-
-        if( (packet_size) <= _credit_counter[_rrIndex] ) {  // if queue's credit is available
-            queueIndex = _rrIndex;  // select this queue for next transmission
-            _credit_counter[_rrIndex] -= packet_size;   // decrement credit counter of this queue by the next removed packet's size
-
-            //cout << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
-        } else {
-            // give more credit to a queue if necessary
-            _credit_counter[_rrIndex] += _queue_credit[_rrIndex];
-            _rrIndex--; // decrement _rrIndex
-        }
-    } else {
-        // reset credit counter
-        _credit_counter[_rrIndex] = 0;
-        // decrement rrCounter
-        _rrIndex--;
-    }
-    //cout << "DRR chosen " << queueIndex << endl;
-#endif
-
-#if 0
-	// work-conserving DRR, serves all priority queues in a round-robin manner once per scheduler run ("round")
-	for( int index=_nofPriorityClasses-1; index>-1; index-- ) {
-		if( getQueue(index)->length() > 0 ) {	// consider only non-empty queues
-			int packet_size = getQueue(index)->front()->getByteLength();	// packet size in bytes of oldest packet in queue
-
-			if( _credit_counter[index] < packet_size ) {	// credit doesn't last
-				_credit_counter[index] = _credit_counter[index]+_queue_credit[index];	// restore credit counter to allowed ratio of bandwidth
-			}
-			if( (packet_size) <= _credit_counter[index] ) {
-				// if queue's credit is available
-				queueIndex = index;	// select this queue for next transmission
-				_credit_counter[index] -= packet_size;	// decrement credit counter of this queue by the next removed packet's size
-				break;	// non-empty queue found
-			} else {
-				// give more credit to a queue if necessary
-				_credit_counter[index] += _queue_credit[index];
-			}
-		}
-	}
-#else
-    // work-conserving Deficit Round-Robin
-    /*if (_rrIndex < 0)   // reset
-        _rrIndex = _nofPriorityClasses-1;
-
-    for( int i=_rrIndex; i>=0; i-- ) {
-        if( getQueue(i)->length()>0 ) {
-
-            if (_credit_counter[i] == 0) {
-                _credit_counter[i] = _queue_credit[i];    // restore credit counter to allowed ratio of bandwidth
-            }
-            int packet_size = getQueue(i)->front()->getByteLength();
-            if( packet_size <= _credit_counter[i] ) {  // if queue's credit is available
-                queueIndex = i;  // select this queue for next transmission
-                _credit_counter[i] -= packet_size;   // decrement credit counter of this queue by the next removed packet's size
-
-                _rrIndex = i-1; // remember as start-point for next cycle
-                break;
-                //cout << " creditcnt " << credit_counter[_rrCounter] << " " << queue_credit[_rrCounter] << endl;
-            } else {
-                // give more credit to a queue if necessary for the next round (scheduler run)
-                _credit_counter[i] += _queue_credit[i];
-                _rrIndex = i-1; // decrement _rrIndex for next round
-            }
-        } else {
-            _credit_counter[i] = 0;
-        }
-    }
-
-    return queueIndex;
-	*/
-#endif
 	return queueIndex;
 } // DeficitRoundRobinPlus()
+
+int Scheduler::WeightedFairQueuingPlus() {
+	int queueIndex = -1;
+
+
+    // work-conserving WFQ+
+    if( getQueue(_nofPriorityClasses-1)->length() > 0 ) {    // treat highest priority class separately
+        queueIndex = _nofPriorityClasses-1;
+    } else {    // treat standard priority queues fairly
+        if( _rrIndex<0 )    // reset Round-Robin counter
+            _rrIndex = _nofPriorityClasses-2;
+
+		if( getQueue(_rrIndex)->length() > 0 ) {    // consider only non-empty queues
+			if (_wfq_counter[_rrIndex] == 0)
+				_wfq_counter[_rrIndex] = _wfq_credit[_rrIndex];    // restore credit counter to allowed ratio of bandwidth
+
+			int queue_length = getQueue(_rrIndex)->length(); // packet size in bytes of oldest packet in queue
+
+			if( queue_length <= _wfq_counter[_rrIndex] ) {  // if queue's credit is available
+				queueIndex = _rrIndex;  // select this queue for next transmission
+				_wfq_counter[_rrIndex] -= 1;   // decrement credit counter of this queue by the next removed packet's size
+			} else {
+				// give more credit to a queue if necessary
+				_wfq_counter[_rrIndex] += _wfq_credit[_rrIndex];
+				_rrIndex--; // decrement _rrIndex
+			}
+		} else {
+			_wfq_counter[_rrIndex] = 0;  // reset credit counter
+			_rrIndex--; // decrement _rrIndex
+		}
+    }
+
+	return queueIndex;
+}	// WeightedFairQueuingPlus()
 
 int Scheduler::WeightedRandomQueuing() {
 	int queueIndex = -1;
@@ -469,62 +347,6 @@ int Scheduler::WeightedRandomQueuing() {
 	return queueIndex;
 } // WeightedRandomQueuing()
 
-int Scheduler::FirstComeFirstServed() {
-	int queueIndex=-1;
-	map< double, int >::iterator sit;
-	string qname;
-	// check packets in all queues, chose oldest
-	_mapPacketAges.clear();
-	for(int k=(_nofPriorityClasses-1); k>-1; k--) {
-		IPassiveQueue *q = getQueue(k);
-		if(q->length()>0){
-
-			// implementation trick to treat all available priority queues as a single queue
-			// iterate over all packets in queue
-			qname = getQueueName(k);
-			cQueue cq = q->getQueue();
-			//cout << "1 " << qname << " " << cq.length();
-			if( getQueue(2) != NULL ) {
-				cQueue::Iterator qit = cQueue::Iterator(cq,false);
-				while(!qit.end()) {
-					WRPacket *p = (WRPacket*)(cObject*)qit();
-					double s = p->getCreationTime().dbl();
-					_mapPacketAges.insert( pair< double, int >(s, k) );
-					qit++;
-				}
-			}
-		}
-	}
-	//cout << "# packets " << _mapPacketAges.size() << endl;
-
-	if( _mapPacketAges.size()==1) {
-		queueIndex = _mapPacketAges.begin()->second;
-	}else if(_mapPacketAges.size()>0) {
-		sit = _mapPacketAges.end();
-		sit--;
-		queueIndex = sit->second;
-	} else {
-		queueIndex = -1;
-	}
-	return queueIndex;
-	//cout << "FCFS chosen " << queueIndex << endl;
-	//cout << "fcfs list size " << _fcfsQueueServeList.size() << " chosen " << queueIndex << endl;
-} // FirstComeFirstServed()
-
-int Scheduler::findMaxQLengthIndex( int queuelengths[] ) {
-	int queueIndex = -1;
-	int maxi = 0;
-
-	// find queue with maximum length
-	for(int i = _nofPriorityClasses-2; i >= 0; i--) {
-		if( maxi < queuelengths[i] ) {
-			maxi = queuelengths[i];	// maximum length
-			queueIndex = i;			// index of queue with maximum length
-		}
-	}
-	return queueIndex;
-} // findMaxQLengthIndex()
-
 IPassiveQueue *Scheduler::getQueue(int index) {
 	std::string queue = "queue";
 	char buffer[3];
@@ -537,17 +359,6 @@ IPassiveQueue *Scheduler::getQueue(int index) {
 	//cout << "get queue " << queue << endl;
 	return pqueue;
 } // getQueue()
-
-string Scheduler::getQueueName(int index) {
-	std::string queue = "queue";
-	char buffer[3];
-
-	sprintf(buffer, "%d", index);
-	buffer[2] = '\0';
-	queue += buffer;
-	//cout << "get queue " << queue << endl;
-	return queue;
-} // getQueueName()
 
 }
 ;
