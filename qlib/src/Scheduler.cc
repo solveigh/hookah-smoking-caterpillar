@@ -183,6 +183,7 @@ int Scheduler::Priority() {
 	for( int index = _nofPriorityClasses-1; index>=0; index-- ) {
 		if( getQueue(index)->length()>0 ) {
 			queueIndex = index;
+			break;	// leave for-loop
 		}
 	}
 
