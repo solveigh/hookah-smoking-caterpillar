@@ -69,14 +69,12 @@ class QUEUEING_API Scheduler : public cSimpleModule
 		// WFQ
 		int WeightedFairQueuingPlus();
 		int _wfq_weight[8];	// only 0..3 are used for N=3
-		int _wfq_credit[8];	// only 0..3 are used for N=3
 		int _wfq_counter[8]; // only 0..3 are used for N=3
 
         // DRRP
         int DeficitRoundRobinPlus();
-        int _queue_credit[8];	// only 0..3 are used for N=3
-    	int _credit_counter[8];	// only 0..3 are used for N=3
-    	int _drr_weight[8];	// only 0..3 are used for N=3
+        int _drr_weight[8];	// only 0..3 are used for N=3
+        int _drr_counter[8];	// only 0..3 are used for N=3
     	int _bandwidth;	// available bandwidth of the network
 
     	int _ifgBytes;	// Interframe Gap
