@@ -19,12 +19,9 @@ void SourceBase::initialize() {
 }
 
 WRPacket *SourceBase::createJob() {
-	// TODO check me - not used!?
 	char buf[80];
 	sprintf(buf, "%.60s-%d", "p", ++packetCounter);
 	WRPacket *packet = new WRPacket(buf);
-	int prio = Useful::getInstance()->generateRandomPriority();
-	packet->setPriority(prio); //par("packetPriority"));
 	return packet;
 }
 
@@ -70,17 +67,12 @@ void Source::initialize() {
 
 	_inputDataFile = par("inputDataFile").stringValue();
 	_data = Useful::getInstance()->readDataList(_inputDataFile);
-	//Useful::getInstance()->appendToFile("out.txt", _inputDataFile.c_str());
-	//Useful::getInstance()->appendToFile("source_out.txt", int(_data.size()));
+
 	while (_data.size() < numPackets) {
 		std::vector<PacketDescription> v = Useful::getInstance()->readDataList(
 				_inputDataFile);
 		_data.insert(_data.end(), v.begin(), v.end());
 	}
-	//Useful::getInstance()->appendToFile("source_out.txt", int(_data.size()));
-
-	//for( int i=0; i<_data.size(); i++ )
-	//std::cout << "i: " << i << " " << _data.at(i).getPriority() << " " << _data.at(i).getSize() << std::endl;
 
 	WATCH(numCreated);
 	numCreated = 0;
@@ -91,7 +83,6 @@ void Source::initialize() {
 
 	outQueue = new cQueue();
 	cout << " Start: " << simTime() << endl;
-
 } // initialize()
 
 void Source::handleMessage(cMessage *msg) {
@@ -129,7 +120,6 @@ void Source::handleMessage(cMessage *msg) {
 					WRPacket *p = generatePacket(prio, (*it).getSize());
 
 					if (it != _data.end() && _nofBurstCounter!=Useful::getInstance()->getBurstIntervals().at(_burstCounter) ) {
-						//cout << "simTime() " << simTime() << endl;
 						sendPacket(p);
 						_data.erase(it);
 						numCreated++;
@@ -138,7 +128,6 @@ void Source::handleMessage(cMessage *msg) {
 					}
 					if( _nofBurstCounter==Useful::getInstance()->getBurstIntervals().at(_burstCounter) ){
 						// wie sicher stellen dass source und sink beim selben event dran kommen???
-						//cout << "lala " << endl;
 						// schedule next burst interval
 						//send(saveBurstDataMsg, "saveBurstData");
 
@@ -192,24 +181,15 @@ void Source::sendPacket(WRPacket* packet) {
 		// cancel and re-schedule
 		cancelEvent(startSendingPacket);
 		scheduleAt((simTime()+t+_ifg), startSendingPacket);
-		//cout << "simTime() " << simTime() << " next " << simTime()+t+_ifg << endl;
-
-		// allow some time between two new packets (lower load)
-		//scheduleAt((simTime()+t+_ifg+_interArrivalTime), startSendingPacket);
 	}
 
 	return;
 } // sendPacket()
 
 WRPacket * Source::generatePacket(int priority, int size) {
-	//log("test");
-	//char buf[10];
-    //sprintf(buf, "%.60s-%d", "p", ++packetCounter);
-    //buf[9] = '\0';
 
 	simtime_t creationTime = simTime();
 	char name[30];
-	//sprintf(name, "id: %ld, priority: %d; %f", packet->getId(), random, triggerTime);
 	sprintf(name, "priority: %d; > %lf", priority,
 			creationTime.dbl());
 	name[29] = '\0';
@@ -217,8 +197,6 @@ WRPacket * Source::generatePacket(int priority, int size) {
 	    packet->setPriority(priority);
 	    packet->setByteLength(size);
 	packet->setName(name);	// set proper name
-	//std::cout << "packet (id: " << packet->getId() << ") priority set to: " << priority << " size " << size << std::endl;
-
 	packet->setTimestamp(creationTime);
 
 	return packet;

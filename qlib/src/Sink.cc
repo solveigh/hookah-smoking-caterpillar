@@ -51,7 +51,6 @@ void Sink::initialize() {
 	_scheduler = dynamic_cast<Scheduler *>((cModule*)getParentModule()->findObject("scheduler", true));
 
     // pointers to other queues
-    //for( int i=_nofCoS; i>-2; i-- )
 	for( int i=0; i<_nofCoS;i++ )
     	_qs.push_back( getQueue(i) );
 }
@@ -74,7 +73,6 @@ void Sink::handleMessage(cMessage *msg) {
 	if( strcmp(msg->getName(),"saveBurstData")!=0 ) {
 		WRPacket *packet = check_and_cast<WRPacket *>(msg);
 		simtime_t lifetime = msg->getArrivalTime() - msg->getCreationTime();
-		//cout << simTime() << " " << __FILE__ << ": " << packet->getName() << " lifetime " << lifetime << endl;
 		numReceived++;
 
 		switch( packet->getPriority() ) {
@@ -132,7 +130,7 @@ void Sink::handleMessage(cMessage *msg) {
 		cancelAndDelete(msg);
 	} else {
 		if( _burstTest==true ) {
-			// write resultfiles
+			// write result files
 
 			int burstCounter = _source->getBurstCounter();
 			int nofBursts = Useful::getInstance()->getBurstIntervals().at(burstCounter);
@@ -162,8 +160,6 @@ void Sink::handleMessage(cMessage *msg) {
 				write2File("out.csv");
 
 				string fname = begin + string("dropped_");
-				//fname+=_router->getSchedulingAlgorithm();
-				//fname+="_";
 				fname+=_source->getInputDataFileName();
 				fname+=string(".csv");
 
@@ -194,7 +190,6 @@ void Sink::handleMessage(cMessage *msg) {
 				fname+=string(".csv");
 				writeDropped2FilePercentage4Table(fname);
 			}
-			//msg->removeFromOwnershipTree();
 			cancelAndDelete(msg);
 		} // if( _burstTest==true )
 	}
@@ -240,9 +235,6 @@ double Sink::calculatePacketLoss( int priorityQueue ) {
 } //calculatePacketLoss()
 
 void Sink::finish() {
-
-	//cout << __FILE__ << " received: " <<  numReceived << endl;
-
 	// overview
 	cout << this->getName() << ": CoS: " << _qs.size() << " " << _scheduler->getSchedulingAlgorithm() << " Scenario: " << _source->getInputDataFileName() << endl;
 
@@ -264,9 +256,6 @@ void Sink::finish() {
 
 	// find out number of objects still stuck in server
 
-	//int nofObjects = _server->getLiveObjectCount();
-	//cout << " " << nofObjects << std::endl;
-
 	int nofCreated = _source->getCreated();
 	int nofArrived=-1;
 	if( _nofCoS==8 )
@@ -280,8 +269,6 @@ void Sink::finish() {
 	write2File("out.csv");
 
 	string fname = string("dropped_");
-	//fname+=_router->getSchedulingAlgorithm();
-	//fname+="_";
 	fname+=_source->getInputDataFileName();
 	fname+=string(".csv");
 
@@ -524,17 +511,11 @@ void Sink::writeDropped2File(string filename) {
 			Useful::getInstance()->appendToFile(filename, str);
 		}
 #endif
-#if 1
 		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(), _source->getSent().at(7), _qs.at(7)->getDropped().size(),
 				_source->getSent().at(6), _qs.at(6)->getDropped().size(), _source->getSent().at(5), _qs.at(5)->getDropped().size(),
 				_source->getSent().at(4), _qs.at(4)->getDropped().size(), _source->getSent().at(3), _qs.at(3)->getDropped().size(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(), _source->getSent().at(1), _qs.at(1)->getDropped().size(),
 				_source->getSent().at(0), _qs.at(0)->getDropped().size());
-#else
-		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(),  _qs.at(7)->getDropped().size(),
-			_qs.at(6)->getDropped().size(), _qs.at(5)->getDropped().size(), _qs.at(4)->getDropped().size(), _qs.at(3)->getDropped().size(),
-			_qs.at(2)->getDropped().size(), _qs.at(1)->getDropped().size(), _qs.at(0)->getDropped().size());
-#endif
 	} else if(_nofCoS==3) {
 #ifdef __linux__
 		if( !Useful::getInstance()->testFirstLineOfFile(filename, "Algorithm") ) {
@@ -543,15 +524,10 @@ void Sink::writeDropped2File(string filename) {
 			Useful::getInstance()->appendToFile(filename, str);
 		}
 #endif
-#if 1
 		sprintf(buf,"%s,%d,%d,%d,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(),
 				_source->getSent().at(2), _qs.at(2)->getDropped().size(),
 				_source->getSent().at(1), _qs.at(1)->getDropped().size(),
 				_source->getSent().at(0), _qs.at(0)->getDropped().size());
-#else
-		sprintf(buf,"%s,%d,%d,%d", _scheduler->getSchedulingAlgorithm().c_str(),
-			_qs.at(2)->getDropped().size(), _qs.at(1)->getDropped().size(), _qs.at(0)->getDropped().size());
-#endif
 	}
 	str = string(buf);
 	Useful::getInstance()->appendToFile(filename, str);
@@ -633,8 +609,6 @@ void Sink::writeDropped2FilePercentage(string filename) {
 	char buf[150];
 	if( _nofCoS==8 ) {
 		if( !Useful::getInstance()->testFirstLineOfFile(filename, "Algorithm") ) {
-			//sprintf(buf,"Algorithm,7 (%d),drop7,6 (%d),drop6,5 (%d),drop5,4 (%d),drop4,3 (%d),drop3,2 (%d),drop2,1 (%d),drop1,0 (%d),drop0", _source->getSent().at(7), _source->getSent().at(6), _source->getSent().at(5),
-					//_source->getSent().at(4),_source->getSent().at(3), _source->getSent().at(2), _source->getSent().at(1), _source->getSent().at(0));
 			sprintf(buf,"Algorithm,7,7.0,6,6.0,5,5.0,4,4.0,3,3.0,2,2.0,1,1.0,0,0.0");
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
@@ -656,13 +630,11 @@ void Sink::writeDropped2FilePercentage(string filename) {
 		Useful::getInstance()->appendToFile(filename, str);
 	} else if(_nofCoS==3) {
 		if( !Useful::getInstance()->testFirstLineOfFile(filename, "Algorithm") ) {
-			//sprintf(buf,"Algorithm,2 (%d),drop2,1 (%d),drop1,0 (%d),drop0", _source->getSent().at(2), _source->getSent().at(1), _source->getSent().at(0));
 			sprintf(buf,"Algorithm,2,2.0,1,1.0,0,0.0");
 			str = string(buf);
 			Useful::getInstance()->appendToFile(filename, str);
 		}
 		double d0=0., d1=0., d2=0.;
-		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
@@ -692,7 +664,6 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 			Useful::getInstance()->appendToFile(filename, str);
     	}
 		double d0=0., d1=0., d2=0., d3=0., d4=0., d5=0., d6=0., d7=0.;
-		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
 		d7 = perc(_qs.at(7)->getDropped().size(),_source->getSent().at(7));
 		d6 = perc(_qs.at(6)->getDropped().size(),_source->getSent().at(6));
 		d5 = perc(_qs.at(5)->getDropped().size(),_source->getSent().at(5));
@@ -724,7 +695,6 @@ void Sink::writeDropped2FilePercentage4Table(string filename) {
 			Useful::getInstance()->appendToFile(filename, str);
     	}
 		double d0=0., d1=0., d2=0.;
-		//cout << "dropped " << _qs.at(7)->getDropped().size() << " sent " << _source->getSent().at(7) << endl;
 		d2 = perc(_qs.at(2)->getDropped().size(),_source->getSent().at(2));
 		d1 = perc(_qs.at(1)->getDropped().size(),_source->getSent().at(1));
 		d0 = perc(_qs.at(0)->getDropped().size(),_source->getSent().at(0));
@@ -809,7 +779,6 @@ double Sink::avg_lifetime(vector<double> v) {
 			avg_lt += (*lit);
 		}
 		avg_lt /= v.size();
-		//std:: cout << "    lifetime " << avg_lt << "s = " << avg_lt / 1000.0 << "ms" << std::endl;
 		return s2ns((double) avg_lt);
 	} else {
 		return 0.0;
@@ -824,7 +793,6 @@ double Sink::avg_lifetime(vector<simtime_t> v) {
 			avg_lt += (*lit).dbl();
 		}
 		avg_lt /= v.size();
-		//std:: cout << "    lifetime " << avg_lt << "s = " << avg_lt / 1000.0 << "ms" << std::endl;
 		return s2ns((double) avg_lt);
 	} else {
 		return 0.0;
@@ -1886,8 +1854,6 @@ void Sink::writeNumbers2TexFile(string filename) {
 			return;
 		}
 	}
-
-
 } // writeNumbers2TexFile()
 
 

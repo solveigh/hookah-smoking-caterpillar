@@ -63,7 +63,6 @@ public:
 	double getTime(string name);
 	int getPriority(string name);
 
-	int generateRandomPriority();
 	int generateRandomPriority(int lower, int upper);
 	int generateRandomSize();
 

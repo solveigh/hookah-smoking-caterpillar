@@ -47,10 +47,7 @@ void Queue::finish()
 
 void Queue::handleMessage(cMessage *msg)
 {
-	//std::cout << " " << __FILE__ << ": "<< __FUNCTION__ << " " << msg->getName() << std::endl;
 	WRPacket *job = check_and_cast<WRPacket *>(msg);
-
-	//cout << simTime() << " " << __FILE__ << ": " << msg->getName() << " queue size " << this->_size << " capacity " << this->_capacity << endl;
 	enqueue(job);
 
     // change the icon color
@@ -77,7 +74,6 @@ void Queue::enqueue(cPacket* msg) {
 	// queue everything
 	queue.insert(job);
 	emit(queueLengthSignal, length());
-	//std::cout << this->getName() << " Q size " << queue.length() << std::endl;
 } // enequeue()
 
 int Queue::length()
@@ -112,13 +108,11 @@ void Queue::request(int gateIndex)
 
     simtime_t d = simTime() - job->getTimestamp();
     job->setTotalQueueingTime(job->getTotalQueueingTime() + d);
-    //cout << "queuingTime " << job->getTotalQueueingTime() << endl;
     emit(queueingTimeSignal, d);
 
     // reset timestamp
     job->setTimestamp();
 
-    //cout << simTime() << " " << __FILE__ << ": " << job->getName() << endl;
     send(job, "out"); //, gateIndex);
 
     if (ev.isGUI())

@@ -95,7 +95,6 @@ class QUEUEING_API Source : public SourceBase
     	bool saveBurstData() { return _saveBurstData; };
 };
 
-
 /**
  * Generates jobs; see NED file for more info.
  */

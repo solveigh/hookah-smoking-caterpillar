@@ -38,7 +38,6 @@ void Useful::setBurstIntervals() {
 double Useful::getTime(std::string name) {
 	size_t found;
 	found = name.find("; ");
-	//std::cout << "packetname " << packetname << " found " << found << std::endl;
 	// extract time from packetname
 	double triggerTime=0.;
 	if( found!=std::string::npos ) {
@@ -46,7 +45,6 @@ double Useful::getTime(std::string name) {
 		std::istringstream stm;
 		stm.str(time);
 		stm >> triggerTime;
-		//std::cout << "time " << time << " " << triggerTime << std::endl;
 	}
 	return triggerTime;
 }
@@ -54,7 +52,6 @@ double Useful::getTime(std::string name) {
 int Useful::getPriority(std::string name) {
 	size_t found1;
 	found1 = name.find("y: ");
-	//std::cout << "packetname " << packetname << " found1 " << found1 << std::endl;
 	// extract priority from packetname
 	int prio=0;
 	if( found1!=std::string::npos ) {
@@ -66,18 +63,6 @@ int Useful::getPriority(std::string name) {
 	}
 	return prio;
 } // getPriority()
-
-int Useful::generateRandomPriority() {
-	int random = 0;
-#if 0
-	srand(time(NULL));
-	// TODO
-	random = rand() % 7 + 0;  //number between 0 and 7
-#else
-	random = (int)(rand() / (((double)RAND_MAX + 1)/ (double)(7+1)));
-#endif
-	return random;
-} // generateRandomPriority()
 
 int Useful::generateRandomPriority(int lower, int upper) {
 	int random = rand() % (upper - lower) + lower;
@@ -111,7 +96,6 @@ std::vector<PacketDescription> Useful::readDataList(std::string filename) {
 	FILE* filehandle = fopen( filename.c_str(),"r" );
 	if( filehandle ) {
 		while( fscanf(filehandle,"%d %d\n", &priority, &size)>0 ) {
-			//cout << "read " << priority << " " << size << endl;
 			v.push_back(PacketDescription(priority, size));
 		}
 		fclose(filehandle );
@@ -182,25 +166,6 @@ struct packet{
 	int payload;	// bytes
 };
 
-/*
-s: 	1			1 s
-ms: 1			0.001 s
-μs: 1			0.000001 s
-
-1s = 1000 ms = 1000000 μs
-
-*/
-
-/*
-prio	frequency		payload
-7 		1 ms -> 100μs 	64 -> 1500 bytes
-6 		1 sec -> 1ms	64 -> 1500 bytes
-5 		1 sec -> 1ms	64 -> 1500 bytes
-4 		1 sec -> 1ms	64 -> 1500 bytes
-3 		2 sec -> 1ms	64 -> 1500 bytes
-2 		3 sec -> 1ms	64 -> 1500 bytes
-1 		3 sec -> 1ms	64 -> 1500 bytes
-0 		4 sec -> 1ms	64 -> 1500 bytes	*/
 void Useful::createInputData(int number) {
 	packet p;
 	for (int var = 0; var < number; ++var) {
@@ -210,7 +175,6 @@ void Useful::createInputData(int number) {
 		// frequency is encoded in order
 		writeRandomDataToList("inputdata.txt", p.priority, p.payload);
 	}
-
 } // createInputData()
 
 
