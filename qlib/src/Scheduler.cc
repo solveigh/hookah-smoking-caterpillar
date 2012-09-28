@@ -99,11 +99,6 @@ void Scheduler::handleMessage(cMessage *msg) {
 		// a trigger event arrived (either packet transmission finished or simulated cycle event)
 		switch (_routingAlgorithm) {
 
-#if 0
-		case ALG_FCFS: // K=8, K=3
-			FirstComeFirstServed();
-			break;
-#endif
 		case ALG_PRIO: // K=8, K=3
 			queueIndex = Priority();
 			break;
@@ -147,9 +142,6 @@ void Scheduler::handleMessage(cMessage *msg) {
 	} else {
 		// a requested packet arrived
 		WRPacket* p = check_and_cast<WRPacket*>(msg);
-		//cout << simTime() << " " << p->getTimestamp() << " " << p->getTotalQueueingTime() << " "<< p->getTotalServiceTime() << endl;
-		//cout << "triggerServiceMsg " << triggerServiceMsg->getSendingTime() << " " << simTime()-triggerServiceMsg->getArrivalTime() << " " << triggerServiceMsg->getTimestamp() << " " << triggerServiceMsg->getArrivalTime() << endl;
-		//cout << simTime() << " " << p->getArrivalTime() << " " << triggerServiceMsg->getArrivalTime() << " " << triggerServiceMsg->getSendingTime() << endl;
 		p->setTotalServiceTime(
 				p->getTotalServiceTime()
 						+ (_triggerServiceMsg->getArrivalTime()
@@ -183,7 +175,6 @@ int Scheduler::Priority() {
 
 int Scheduler::RoundRobin() {
 
-#if 1
 	// work-conserving Round-Robin
 	int queueIndex = -1;
 	int index=0;
@@ -196,15 +187,6 @@ int Scheduler::RoundRobin() {
 		}
 	}
 	return queueIndex;
-#else
-	// non work-conserving Round-Robin
-	if (_rrIndex < 0)	// reset
-		_rrIndex = _nofPriorityClasses-1;
-
-	int queueIndex = _rrIndex;
-	_rrIndex--;
-	return queueIndex;
-#endif
 } // RoundRobin()
 
 int Scheduler::LongestQueueFirstPlus() {
@@ -228,7 +210,6 @@ int Scheduler::LongestQueueFirstPlus() {
 int Scheduler::DeficitRoundRobinPlus() {
 	int queueIndex = -1;
 
-#if 1
    // work-conserving DRR+
 	if( getQueue(_nofPriorityClasses-1)->length() > 0 ) {    // treat highest priority class separately
 		queueIndex = _nofPriorityClasses-1;
@@ -258,34 +239,6 @@ int Scheduler::DeficitRoundRobinPlus() {
 	        }
 		}
 	}
-#else
-    // work-conserving DRR+
-    if( getQueue(_nofPriorityClasses-1)->length() > 0 ) {    // treat highest priority class separately
-        queueIndex = _nofPriorityClasses-1;
-    } else {    // treat standard priority queues fairly
-        if( _rrIndex<0 )    // reset Round-Robin counter
-            _rrIndex = _nofPriorityClasses-2;
-
-        if( getQueue(_rrIndex)->length() > 0 ) {    // consider only non-empty queues
-            if( _drr_counter[_rrIndex]==0 )
-            	_drr_counter[_rrIndex] = _queue_credit[_rrIndex];    // restore credit counter to allowed quantum of bandwidth
-
-        	int packet_size = getQueue(_rrIndex)->front()->getByteLength(); // packet size in bytes of oldest packet in queue
-
-            if( (packet_size) <= _drr_counter[_rrIndex] ) {  // if queue's credit is available
-                queueIndex = _rrIndex;  // select this queue for next transmission
-                _drr_counter[_rrIndex] -= packet_size;   // decrement credit counter of this queue by the next removed packet's size
-            } else {
-                // give more credit to a queue if necessary
-                _drr_counter[_rrIndex] += _queue_credit[_rrIndex];
-                _rrIndex--; // decrement _rrIndex
-            }
-        } else {
-        	_drr_counter[_rrIndex] = 0;	// reset queue credit to 0
-            _rrIndex--; // decrement _rrIndex
-        }
-    }
-#endif
 	return queueIndex;
 } // DeficitRoundRobinPlus()
 
@@ -302,11 +255,11 @@ int Scheduler::WeightedFairQueuingPlus() {
 
 			if( getQueue(index)->length() > 0 ) {    // consider only non-empty queues
 				if (_wfq_counter[index] == 0)
-					_wfq_counter[index] = _wfq_weight[index];    // restore credit counter to allowed ratio of bandwidth
+					_wfq_counter[index] = _wfq_weight[index];    // restore credit counter to number of packets
 
 				if( _wfq_counter[index]>0 ) {  // if queue's credit is available and queue is not empty
 					queueIndex = index;  // select this queue for next transmission
-					_wfq_counter[index] -= 1;   // decrement credit counter of this queue by the next removed packet's size
+					_wfq_counter[index] -= 1;   // decrement credit counter of this queue by the next removed packet
 					break; // leave for-loop
 				} else {
 					// give more credit to a queue if necessary
@@ -337,7 +290,6 @@ int Scheduler::WeightedRandomQueuing() {
 			sumNonEmptyQueueWeights += _wrq_weight[i];
 		}
 	}
-	//cout << "sumNonEmptyQueueWeights " << sumNonEmptyQueueWeights << endl;
 
 	if( sumNonEmptyQueueWeights>0 ) {
 		// select non-empty queue according to guaranteed weight,
