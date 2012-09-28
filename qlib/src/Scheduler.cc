@@ -17,7 +17,7 @@ void Scheduler::initialize() {
 	} else if (strcmp(algName, "RR") == 0) {
 		_routingAlgorithm = ALG_RR;
 		_schedulingAlgorithm = "RR";
-		_rrIndex = 0; //_nofPriorityClasses-1;
+		_rrIndex = 0;
 	} else if (strcmp(algName, "LQF+") == 0) {
 		_routingAlgorithm = ALG_LQFP;
 		_schedulingAlgorithm = "LQFP";
@@ -27,11 +27,11 @@ void Scheduler::initialize() {
 	} else if (strcmp(algName, "DRR+") == 0) {
 		_routingAlgorithm = ALG_DRRP;
 		_schedulingAlgorithm = "DRRP";
-		_rrIndex = _nofPriorityClasses-2;
+		_rrIndex = 0;
 	} else if (strcmp(algName, "WFQ+") == 0) {
 		_routingAlgorithm = ALG_WFQP;
 		_schedulingAlgorithm = "WFQP";
-		_rrIndex = _nofPriorityClasses-2;
+		_rrIndex = 0;
 	}
 
     // WFQ+
@@ -246,6 +246,7 @@ int Scheduler::DeficitRoundRobinPlus() {
 	            if( packet_size <= _drr_counter[index] ) {  // if queue's credit is available
 	                queueIndex = index;  // select this queue for next transmission
 	                _drr_counter[index] -= packet_size;   // decrement credit counter of this queue by the next removed packet's size
+	                break; // leave for-loop
 	            } else {
 	                // give more credit to a queue if necessary
 	                _drr_counter[index] += _drr_weight[index];
@@ -306,6 +307,7 @@ int Scheduler::WeightedFairQueuingPlus() {
 				if( _wfq_counter[index]>0 ) {  // if queue's credit is available and queue is not empty
 					queueIndex = index;  // select this queue for next transmission
 					_wfq_counter[index] -= 1;   // decrement credit counter of this queue by the next removed packet's size
+					break; // leave for-loop
 				} else {
 					// give more credit to a queue if necessary
 					_wfq_counter[index] += _wfq_weight[index];
